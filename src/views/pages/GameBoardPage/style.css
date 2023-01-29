@@ -1,0 +1,38 @@
+.page-container {
+  display: flex;
+  flex: 1;
+  width: 100%;
+  height: 100%;
+}
+
+.page-container--column {
+  flex-direction: column;
+}
+
+.page-container__board {
+  display: flex;
+  flex: 1;
+}
+
+.page-container__part {
+  width: 50%;
+  height: 100%;
+  padding: 24px;
+}
+
+.page-container__part:first-child {
+  border-right: 1px solid #434340;
+}
+
+.page-container__logger {
+  flex-basis: 300px;
+  max-height: 300px;
+}
+
+.page-container__glass {
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 8px;
+  box-shadow: 0 4px 30px rgb(0 0 0 / 10%);
+  backdrop-filter: blur(2px);
+}

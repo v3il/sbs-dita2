@@ -1,0 +1,29 @@
+.player-form {
+  padding: 24px;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.player-form__title {
+  font-size: 36px;
+  margin-bottom: 48px;
+}
+
+.player-form__title.red {
+  color: red;
+}
+
+.player-form__title.blue {
+  color: blue;
+}
+
+.player-form__label {
+  margin-bottom: 16px;
+}
+
+.player-form__input {
+  width: 100%;
+  margin-bottom: 24px;
+}
