@@ -25,7 +25,6 @@ export class Player {
 
     setHero(hero) {
         this.hero = hero;
-        this.events.emit('heroSelected');
     }
 
     async useSpell(spell, target) {
