@@ -72,7 +72,7 @@ export class PlayerForm extends ComponentView {
             avatarImage.src = currentHeroAvatarURL;
 
             heroAvatarButton.addEventListener('click', () => {
-                this.heroStats.render(hero);
+                this.heroStats.showStats(hero);
                 this.#idOfHeroSelected = hero.id;
 
                 if (this.#elementSelectedHero) {
