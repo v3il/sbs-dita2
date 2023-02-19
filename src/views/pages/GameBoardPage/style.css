@@ -33,6 +33,80 @@
   height: 100%;
   background: rgba(0, 0, 0, 0.4);
   border-radius: 8px;
-  box-shadow: 0 4px 30px rgb(0 0 0 / 10%);
+  box-shadow: 0 4px 30px rgba(255, 255, 255, 0.342);
   backdrop-filter: blur(2px);
+}
+
+.data-name-dire {
+  color: rgb(0, 132, 255);
+  background-color: rgba(255, 255, 255, 0.144);
+}
+
+.data-name-radiant {
+  color: rgb(255, 0, 64);
+  background-color: rgba(255, 255, 255, 0.144);
+}
+
+.dire-avatar {
+  max-width: 100%;
+}
+
+.radiant-avatar {
+  max-width: 100%;
+}
+.data-hero-progress-bar-block {
+  padding: 10px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 10px;
+}
+
+.progressBar {
+  height: 20px;
+  width: 100%;
+  background: #969696;
+  display: inline-block;
+  position: relative;
+  overflow: hidden;
+}
+
+.progressBar::before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+.radiantHitPointsContainer::before {
+  width: var(--width, 0);
+  content: "";
+  background: rgb(0, 124, 6);
+}
+
+.radiantManaPointsContainer::before {
+  width: var(--width, 0);
+  content: "";
+  background: rgb(0, 13, 128);
+}
+
+
+.direHitPointsContainer::before {
+  width: var(--width, 0);
+  content: "";
+  background: rgb(0, 124, 6);
+}
+
+.direManaPointsContainer::before {
+  width: var(--width, 0);
+  content: "";
+  background: rgb(0, 13, 128);
+}
+
+.progress-bar-text {
+  z-index: 2;
+  position: absolute;
+  text-align: center;
+  width: 100%;
 }
