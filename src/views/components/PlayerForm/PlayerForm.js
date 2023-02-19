@@ -1,7 +1,8 @@
 /* eslint-disable max-len */
 import heroAvatarTemplate from './heroAvatarTemplate.html?raw';
-import heroStatsTemplate from './heroStatsTemplate.html?raw';
+// import heroStatsTemplate from './heroStatsTemplate.html?raw';
 import template from './template.html?raw';
+import { HeroStats } from '../HeroStat/HeroStat';
 import { ComponentView } from '../ComponentView';
 import './styles.scss';
 import { heroFactory } from '../../../services';
@@ -11,6 +12,11 @@ export class PlayerForm extends ComponentView {
     #player;
     #idOfHeroSelected;
     #elementSelectedHero;
+    heroStatsContainer;
+    heroSelectorContainer;
+    inputField;
+    validationButton;
+    heroStats;
 
     constructor({ player, parentView, el }) {
         super({ parentView, el });
@@ -22,50 +28,37 @@ export class PlayerForm extends ComponentView {
         this.render();
     }
 
+    initPageElements() {
+        this.heroStatsContainer = this.el.querySelector('[data-hero-stat]');
+        this.heroSelectorContainer = this.el.querySelector('[data-hero-selector]');
+        this.inputField = this.el.querySelector('[data-player-name]');
+        this.validationButton = this.el.querySelector('[data-confirm]');
+        this.heroStats = new HeroStats({
+            parentView: this,
+            el: this.heroStatsContainer
+        });
+    }
+
     getNameValidation() {
-        const inputField = this.el.querySelector('[data-player-name]');
-        const validationButton = this.el.querySelector('[data-confirm]');
+        this.validationButton.disabled = true;
 
-        validationButton.disabled = true;
+        this.inputField.addEventListener('input', () => {
+            if (this.inputField.value !== '') {
+                this.inputField.style.boxShadow = '0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7';
+            } else { this.inputField.style.boxShadow = ''; }
 
-        inputField.addEventListener('input', () => {
-            if (inputField.value !== '') {
-                inputField.style.boxShadow = '0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7';
-            } else { inputField.style.boxShadow = ''; }
-
-            if ((inputField.value !== '') && this.#idOfHeroSelected !== null) {
-                validationButton.disabled = false;
-                validationButton.style.boxShadow = '0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7';
+            if ((this.inputField.value !== '') && this.#idOfHeroSelected !== null) {
+                this.validationButton.disabled = false;
+                this.validationButton.style.boxShadow = '0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7';
             } else {
-                validationButton.disabled = true;
-                validationButton.style.boxShadow = '';
+                this.validationButton.disabled = true;
+                this.validationButton.style.boxShadow = '';
             }
         });
     }
 
-    showStats(hero) {
-        const heroStats = this.el.querySelector('[data-hero-stat]');
-        heroStats.innerHTML = heroStatsTemplate;
-
-        const heroName = this.el.querySelector('[data-hero-name]');
-        heroName.innerHTML = hero.name;
-
-        const attributes = this.el.querySelector('[data-hero-stats]');
-
-        Array.from(attributes.children).forEach((child) => {
-            const attributeName = child.getAttribute('stat');
-            const attrValueElement = document.createElement('p');
-
-            attrValueElement.innerHTML = hero[attributeName];
-            child.appendChild(attrValueElement);
-        });
-    }
-
     renderHeroIcons() {
-        const heroSelector = this.el.querySelector('[data-hero-selector]');
         const heroes = heroFactory.availableHeroes;
-        const confirmationButton = this.el.querySelector('[data-confirm]');
-        const nameInput = this.el.querySelector('[data-player-name]');
 
         heroes.forEach((hero) => {
             const currentHeroAvatarURL = DotaAssetUrlManager.getHeroImageUrl(hero.id);
@@ -76,11 +69,11 @@ export class PlayerForm extends ComponentView {
             const avatarImage = heroAvatarButton.querySelector('[data-hero-avatar]');
 
             heroAvatarButton.setAttribute('class', 'hero-avatar-button');
-            avatarImage.setAttribute('src', currentHeroAvatarURL);
+            avatarImage.src = currentHeroAvatarURL;
 
             heroAvatarButton.addEventListener('click', () => {
+                this.heroStats.render(hero);
                 this.#idOfHeroSelected = hero.id;
-                this.showStats(hero);
 
                 if (this.#elementSelectedHero) {
                     this.#elementSelectedHero.setAttribute('class', 'hero-avatar-button');
@@ -88,27 +81,26 @@ export class PlayerForm extends ComponentView {
                 this.#elementSelectedHero = heroAvatarButton;
                 this.#elementSelectedHero.setAttribute('class', 'hero-avatar-button-active');
 
-                if (nameInput.value !== '') {
-                    confirmationButton.disabled = false;
-                    confirmationButton.style.boxShadow = '0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7';
+                if (this.inputField.value !== '') {
+                    this.confirmationButton.disabled = false;
+                    this.validationButton.style.boxShadow = '0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7';
                 }
             });
 
-            heroSelector.appendChild(heroAvatarButton);
+            this.heroSelectorContainer.appendChild(heroAvatarButton);
         });
     }
 
     getHeroConfirmation() {
-        const confirmButton = this.el.querySelector('[data-confirm]');
-        const nameInput = this.el.querySelector('[data-player-name]');
-
-        confirmButton.addEventListener('click', () => {
+        this.validationButton.addEventListener('click', () => {
             if (this.#idOfHeroSelected) {
                 const selectedHero = heroFactory.createHero(this.#idOfHeroSelected, this.#player.events);
-                confirmButton.disabled = true;
-                nameInput.disabled = true;
+
+                this.validationButton.disabled = true;
+                this.inputField.disabled = true;
+                this.validationButton.style.boxShadow = '';
                 this.disableHeroAvatars();
-                confirmButton.style.boxShadow = '';
+                this.#player.setName(this.inputField.value);
                 this.#player.setHero(selectedHero);
                 this.emit('selected');
             }
@@ -116,17 +108,16 @@ export class PlayerForm extends ComponentView {
     }
 
     disableHeroAvatars() {
-        const heroSelector = this.el.querySelector('[data-hero-selector]');
-
-        Array.from(heroSelector.children).forEach((node) => {
+        Array.from(this.heroSelectorContainer.children).forEach((node) => {
             const currentElement = node;
-            // if (node === this.#elementSelectedHero) { return; }
+
             currentElement.disabled = true;
         });
     }
 
     render() {
         this.mountElement(template);
+        this.initPageElements();
 
         const title = this.el.querySelector('[data-title]');
 
