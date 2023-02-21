@@ -1,4 +1,6 @@
 import { PageView } from '../PageView';
+import { HeroAction } from '../../components/HeroAction/HeroAction';
+import { HeroStats } from '../../components/HeroStat/HeroStat';
 import { ProgressBar } from '../../components/ProgressBar/ProgressBar';
 import template from './template.html?raw';
 import { game } from '../../../models';
@@ -13,6 +15,10 @@ export class GameBoardPage extends PageView {
         this.direTeam = {};
         this.radiantHeroProgressBar = null;
         this.direHeroProgressBar = null;
+        this.radiantHeroStats = null;
+        this.direHeroStats = null;
+        this.radiantHeroAction = null;
+        this.direHeroAction = null;
     }
 
     teamsInit() {
@@ -39,6 +45,34 @@ export class GameBoardPage extends PageView {
             parentView: this,
             el: this.direTeam.view.querySelector('[data-progress-bar]')
         });
+
+        this.radiantHeroStats = new HeroStats({
+            parentView: this,
+            el: this.radiantTeam.view.querySelector('[data-hero-stats]')
+        });
+
+        this.direHeroStats = new HeroStats({
+            parentView: this,
+            el: this.direTeam.view.querySelector('[data-hero-stats]')
+        });
+
+        this.radiantHeroAction = new HeroAction({
+            game,
+            gameBoard: this,
+            player: game.radiantPlayer,
+            playerBoardSide: this.radiantTeam.view,
+            parentView: this,
+            el: this.radiantTeam.view.querySelector('[data-hero-spells]')
+        });
+
+        this.direHeroAction = new HeroAction({
+            game,
+            gameBoard: this,
+            player: game.direPlayer,
+            playerBoardSide: this.direTeam.view,
+            parentView: this,
+            el: this.direTeam.view.querySelector('[data-hero-spells]')
+        });
     }
 
     mountPlayerStatusBar(teams) {
@@ -59,8 +93,8 @@ export class GameBoardPage extends PageView {
             const avatarPicture = document.createElement('img');
 
             avatarPicture.src = avatarURL;
-            avatarPicture.classList = `${player.team}-avatar `;
-            heroAvatarElement.classList = `data-hero-avatar-${player.team}`;
+            avatarPicture.classList = `${player.team}-avatar hero-game-page-avatar`;
+            heroAvatarElement.className = `data-hero-avatar-${player.team} hero-game-page-avatar-elem`;
 
             if (player.hero.isLeftAvatarDirection && player.isRadiant) {
                 avatarPicture.style.transform = 'scale(-1, 1)';
@@ -83,5 +117,9 @@ export class GameBoardPage extends PageView {
         this.mountPlayerHeroAvatar([this.direTeam, this.radiantTeam]);
         this.radiantHeroProgressBar.render();
         this.direHeroProgressBar.render();
+        this.radiantHeroStats.showStats(this.radiantTeam.player.hero);
+        this.direHeroStats.showStats(this.direTeam.player.hero);
+        this.radiantHeroAction.showSpellSIcons();
+        this.direHeroAction.showSpellSIcons();
     }
 }

@@ -47,13 +47,16 @@
   background-color: rgba(255, 255, 255, 0.144);
 }
 
-.dire-avatar {
-  max-width: 100%;
+.hero-game-page-avatar-elem {
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
-.radiant-avatar {
-  max-width: 100%;
+.hero-game-page-avatar {
+  height: 40vh;
 }
+
 .data-hero-progress-bar-block {
   padding: 10px;
   width: 100%;
@@ -65,7 +68,7 @@
 
 .progressBar {
   height: 20px;
-  width: 100%;
+  width: 20vw;
   background: #969696;
   display: inline-block;
   position: relative;
@@ -109,4 +112,50 @@
   position: absolute;
   text-align: center;
   width: 100%;
+}
+
+.hero-action {
+  width: 100%;
+  padding: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  box-sizing: border-box
+}
+
+.hero-name {
+  display: flex;
+  justify-content: center;
+  padding-bottom: 10px;
+}
+
+.player-form_hero-stat {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-width: 400px;
+  flex-grow: 1;
+}
+
+.spellButton {
+cursor: pointer;
+height: fit-content;
+border-color: #000000a9;
+border-width: 1px;
+}
+
+.spellImage {
+  display: block;
+  width: 60px;
+  background-color: rgba(0, 0, 0, 0.89);
+
+}
+
+.data-hero-spells-container {
+  flex-grow: 1;
+  padding-left: 10px;
+  padding-right: 10px;
+  gap: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-evenly;
 }
