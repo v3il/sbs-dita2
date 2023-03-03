@@ -1,10 +1,13 @@
 import { PageView } from '../PageView';
 import { HeroAction } from '../../components/HeroAction/HeroAction';
 import { HeroStats } from '../../components/HeroStat/HeroStat';
+import { PlayerStatusBar } from '../../components/PlayerStatusBar/PlayerStatusBar';
 import { ProgressBar } from '../../components/ProgressBar/ProgressBar';
+import { ActivePlayerControl } from '../../components/ActivePlayerControl/ActivePlayerControl';
 import template from './template.html?raw';
 import { game } from '../../../models';
-import { DotaAssetUrlManager } from '../../../services/DotaAssetUrlManager';
+import { HeroGameboardAvatar } from '../../components/HeroGameboardAvatarBlock/HeroGameboardAvatar';
+import { HeroModifier } from '../../components/HeroModifier/HeroModifier';
 import './style.css';
 
 export class GameBoardPage extends PageView {
@@ -13,12 +16,19 @@ export class GameBoardPage extends PageView {
 
         this.radiantTeam = {};
         this.direTeam = {};
+        this.radiantAvatar = null;
+        this.direAvatar = null;
         this.radiantHeroProgressBar = null;
         this.direHeroProgressBar = null;
         this.radiantHeroStats = null;
         this.direHeroStats = null;
         this.radiantHeroAction = null;
         this.direHeroAction = null;
+        this.activePlayerControl = null;
+        this.radiantPlayerStatusBar = null;
+        this.direHeroProgressBar = null;
+        this.radiantHeroModifier = null;
+        this.direHeroModifier = null;
     }
 
     teamsInit() {
@@ -32,7 +42,24 @@ export class GameBoardPage extends PageView {
             view: document.querySelector('[data-dire-player-view]')
         };
 
+        this.radiantHeroAvatar = new HeroGameboardAvatar({
+            game,
+            player: this.radiantTeam.player,
+            playerBoardSide: this.radiantTeam.view,
+            parentView: this,
+            el: this.radiantTeam.view.querySelector('[data-radiant-hero-avatar]')
+        });
+
+        this.diretHeroAvatar = new HeroGameboardAvatar({
+            game,
+            player: this.direTeam.player,
+            playerBoardSide: this.direTeam.view,
+            parentView: this,
+            el: this.direTeam.view.querySelector('[data-dire-hero-avatar]')
+        });
+
         this.radiantHeroProgressBar = new ProgressBar({
+            game,
             player: game.radiantPlayer,
             playerBoardSide: this.radiantTeam.view,
             parentView: this,
@@ -40,6 +67,7 @@ export class GameBoardPage extends PageView {
         });
 
         this.direHeroProgressBar = new ProgressBar({
+            game,
             player: game.direPlayer,
             playerBoardSide: this.direTeam.view,
             parentView: this,
@@ -73,39 +101,43 @@ export class GameBoardPage extends PageView {
             parentView: this,
             el: this.direTeam.view.querySelector('[data-hero-spells]')
         });
-    }
 
-    mountPlayerStatusBar(teams) {
-        teams.forEach(({ player, view }) => {
-            const statusBarContainer = view.querySelector(`[data-${player.team}-status-bar]`);
-            const nameElement = document.createElement('div');
-            nameElement.classList = `data-name-${player.team}`;
-            nameElement.innerHTML = `${player.name} - team ${player.team}`.toUpperCase();
-            view.replaceChild(nameElement, statusBarContainer);
+        this.activePlayerControl = new ActivePlayerControl({
+            game,
+            radiantView: this.radiantTeam.view,
+            direView: this.direTeam.view
         });
-    }
 
-    mountPlayerHeroAvatar(teams) {
-        teams.forEach(({ player, view }) => {
-            const avatarContainer = view.querySelector(`[data-${player.team}-hero-avatar]`);
-            const avatarURL = DotaAssetUrlManager.getHeroAvatarUrl(player.hero.id);
-            const heroAvatarElement = document.createElement('div');
-            const avatarPicture = document.createElement('img');
+        this.radiantPlayerStatusBar = new PlayerStatusBar({
+            game,
+            player: this.radiantTeam.player,
+            playerBoardSide: this.radiantTeam.view,
+            parentView: this,
+            el: this.radiantTeam.view.querySelector('[data-radiant-status-bar]')
+        });
 
-            avatarPicture.src = avatarURL;
-            avatarPicture.classList = `${player.team}-avatar hero-game-page-avatar`;
-            heroAvatarElement.className = `data-hero-avatar-${player.team} hero-game-page-avatar-elem`;
+        this.direPlayerStatusBar = new PlayerStatusBar({
+            game,
+            player: this.direTeam.player,
+            playerBoardSide: this.direTeam.view,
+            parentView: this,
+            el: this.direTeam.view.querySelector('[data-dire-status-bar]')
+        });
 
-            if (player.hero.isLeftAvatarDirection && player.isRadiant) {
-                avatarPicture.style.transform = 'scale(-1, 1)';
-            }
+        this.radiantHeroModifier = new HeroModifier({
+            game,
+            player: this.radiantTeam.player,
+            playerBoardSide: this.radiantTeam.view,
+            parentView: this,
+            el: this.radiantTeam.view.querySelector('[data-hero-modifier]')
+        });
 
-            if (!player.hero.isLeftAvatarDirection && !player.isRadiant) {
-                avatarPicture.style.transform = 'scale(-1, 1)';
-            }
-
-            heroAvatarElement.append(avatarPicture);
-            view.replaceChild(heroAvatarElement, avatarContainer);
+        this.direHeroModifier = new HeroModifier({
+            game,
+            player: this.direTeam.player,
+            playerBoardSide: this.direTeam.view,
+            parentView: this,
+            el: this.direTeam.view.querySelector('[data-hero-modifier]')
         });
     }
 
@@ -113,13 +145,11 @@ export class GameBoardPage extends PageView {
         super.render(mountingEl);
         this.teamsInit();
 
-        this.mountPlayerStatusBar([this.direTeam, this.radiantTeam]);
-        this.mountPlayerHeroAvatar([this.direTeam, this.radiantTeam]);
         this.radiantHeroProgressBar.render();
         this.direHeroProgressBar.render();
         this.radiantHeroStats.showStats(this.radiantTeam.player.hero);
         this.direHeroStats.showStats(this.direTeam.player.hero);
-        this.radiantHeroAction.showSpellSIcons();
-        this.direHeroAction.showSpellSIcons();
+        this.radiantHeroAction.showSpellsIcons();
+        this.direHeroAction.showSpellsIcons();
     }
 }

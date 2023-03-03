@@ -13,18 +13,21 @@ export class Game {
         this.currentPlayer = radiantPlayer;
     }
 
-    // todo
     get enemyPlayer() {
-        return null;
+        return this.currentPlayer === this.radiantPlayer ? this.direPlayer : this.radiantPlayer;
     }
 
     get enemyHero() {
         return this.enemyPlayer.hero;
     }
 
-    // todo
-    // Гетер чекає чи живі герої. Якщо є неживий - повертає його, якщо ні - null
     get winner() {
+        if (this.radiantPlayer.hero.isDead) {
+            return this.direPlayer;
+        }
+        if (this.direPlayer.hero.isDead) {
+            return this.radiantPlayer;
+        }
         return null;
     }
 
@@ -42,8 +45,6 @@ export class Game {
         this.gameEnded = this.winner !== null;
         this.currentPlayer = this.enemyPlayer;
 
-        this.events.emit('playerChanged', { currentPlayer: this.currentPlayer });
-
         if (isNextRound) {
             this.radiantPlayer.updateState();
             this.direPlayer.updateState();
@@ -51,14 +52,23 @@ export class Game {
             this.events.emit('roundChanged', { currentPlayer: this.currentPlayer });
         }
 
+        this.events.emit('playerChanged', { currentPlayer: this.currentPlayer });
+        // тріггер треба для перерахунку доступності кнопок(кд, сайленс), потом подумаю про назву
+        this.events.emit('trigger');
+
         if (this.gameEnded) {
             this.events.emit('gameEnded', { winner: this.winner });
         }
     }
 
     async triggerSpell(spell) {
-        await this.currentPlayer.useSpell(spell, this.enemyHero);
-        this.moveToNextRound();
+        if (spell.isActive) {
+            await this.currentPlayer.useSpell(spell, this.enemyHero);
+            this.moveToNextRound();
+        } else {
+            spell.applyEffect();
+            this.moveToNextRound();
+        }
     }
 
     triggerAttack() {

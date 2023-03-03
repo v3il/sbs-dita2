@@ -3,12 +3,13 @@ import { ComponentView } from '../ComponentView';
 
 export class ProgressBar extends ComponentView {
     constructor({
-        player, playerBoardSide, parentView, el
+        game, player, playerBoardSide, parentView, el
     }) {
         super({ parentView, el });
 
         this.playerBoardSide = playerBoardSide;
         this.player = player;
+        this.game = game;
 
         this.manaBar = null;
         this.hpBar = null;
@@ -39,6 +40,10 @@ export class ProgressBar extends ComponentView {
         this.hpBar = this.playerBoardSide.querySelector('[data-hp-bar]');
         this.hpValue = this.hpBar.firstChild;
         this.hpBar.className = `${this.player.team}HitPointsContainer progressBar`;
+
+        this.game.events.on('update_progress_bars', () => {
+            this.updateProgressBars();
+        });
     }
 
     render() {

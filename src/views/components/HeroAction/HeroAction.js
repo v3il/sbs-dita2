@@ -5,11 +5,10 @@ import heroActionTemplate from './heroActionTemplate.html?raw';
 
 export class HeroAction extends ComponentView {
     constructor({
-        game, gameBoard, player, playerBoardSide, parentView, el
+        game, player, playerBoardSide, parentView, el
     }) {
         super({ parentView, el });
         this.game = game;
-        this.gameBoard = gameBoard;
         this.player = player;
         this.playerBoardSide = playerBoardSide;
         this.hero = player.hero;
@@ -18,65 +17,96 @@ export class HeroAction extends ComponentView {
         this.spellsContainer = null;
         this.spellButtonList = null;
         this.attackButton = null;
-        this.activeElements = null;
 
         this.render();
         this.initElements();
         this.initSpellsEvents();
         this.setSpellsAction();
+        this.showManaCost();
+        this.updateSpellCooldown();
+    }
+
+    render() {
+        super.render(heroActionTemplate);
+    }
+
+    initElements() {
+        this.spellsContainer = this.playerBoardSide.querySelector('[data-hero-spells-container]');
+        this.attackButton = this.spellsContainer.lastElementChild;
+        this.spellButtonList = Array.from(this.playerBoardSide.querySelectorAll('#spell'));
     }
 
     initSpellsEvents() {
-        Array.from(this.spellButtonList).forEach((button, index) => {
-            this.game.events.on(`${this.player.team}_${index}_spell_apply`, ({ target, spell }) => {
-                if (Object.getPrototypeOf(Object.getPrototypeOf(spell)).constructor.name === 'ActiveSpell') {
-                    spell.invoke(target);
-                    this.gameBoard.radiantHeroProgressBar.updateProgressBars();
-                    this.gameBoard.direHeroProgressBar.updateProgressBars();
-                } else {
-                    spell.applyEffect();
-                    this.gameBoard.radiantHeroProgressBar.updateProgressBars();
-                    this.gameBoard.direHeroProgressBar.updateProgressBars();
+        this.spellButtonList.forEach((button, index) => {
+            if (this.heroSpells[index].isActive) {
+                this.game.events.on('roundChanged', () => {
+                    this.heroSpells[index].decreaseCooldown();
+                });
+            }
+
+            this.game.events.on(`${this.player.team}_${index}_spell_apply`, ({ spell }) => {
+                if (spell.hasEnoughMana || !spell.isActive) {
+                    this.game.triggerSpell(spell);
+
+                    this.game.events.emit('update_progress_bars');
                 }
             });
         });
-        this.game.events.on(`${this.player.team}_base_attack`, ({ hero, target }) => {
-            hero.attack(target);
-            this.gameBoard.radiantHeroProgressBar.updateProgressBars();
-            this.gameBoard.direHeroProgressBar.updateProgressBars();
+        this.game.events.on(`${this.player.team}_base_attack`, () => {
+            this.game.triggerAttack();
+            this.game.events.emit('update_progress_bars');
         });
     }
 
     setSpellsAction() {
-        Array.from(this.spellButtonList).forEach((button, index) => {
+        this.spellButtonList.forEach((button, index) => {
             button.addEventListener('click', () => {
                 this.game.events.emit(`${this.player.team}_${index}_spell_apply`, {
-                    // hero: this.hero,
-                    target: this.game.enemyHero,
                     spell: this.heroSpells[index]
                 });
             });
         });
         this.attackButton.addEventListener('click', () => {
-            this.game.events.emit(`${this.player.team}_base_attack`, { hero: this.hero, target: this.game.enemyHero });
+            this.game.events.emit(`${this.player.team}_base_attack`);
         });
     }
 
-    initElements() {
-        this.spellsContainer = this.playerBoardSide.querySelector('[data-hero-spells-container]');
-        this.spellButtonList = this.playerBoardSide.querySelectorAll('#spell');
-        this.attackButton = this.spellsContainer.lastElementChild;
+    showManaCost() {
+        this.spellButtonList.forEach((button, index) => {
+            if (this.heroSpells[index].isActive) {
+                const manacostIndicator = document.createElement('div');
+
+                manacostIndicator.className = 'manacost-indicator';
+                manacostIndicator.innerText = this.heroSpells[index].manacost;
+                button.append(manacostIndicator);
+            }
+        });
     }
 
-    showSpellSIcons() {
+    updateSpellCooldown() {
+        this.game.events.on('trigger', () => {
+            this.spellButtonList.forEach((button, index) => {
+                const spell = this.heroSpells[index];
+                const cooldownCounter = button.querySelector('[data-cooldown]');
+
+                if (spell.isActive && spell.isOnCooldown) {
+                    cooldownCounter.style.zIndex = '2';
+                    cooldownCounter.textContent = spell.currentCooldown;
+                } else {
+                    cooldownCounter.style.zIndex = '-1';
+                }
+            });
+        });
+    }
+
+    showSpellsIcons() {
         Array.from(this.spellButtonList).forEach((button, index) => {
             const image = button.firstElementChild;
-            image.src = DotaAssetUrlManager.getSpellUrl(this.heroSpells[index].id);
+            const spell = this.heroSpells[index];
+
+            image.src = DotaAssetUrlManager.getSpellUrl(spell.id);
+            image.setAttribute('title', `${spell.description}`);
         });
         this.attackButton.firstElementChild.src = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react//heroes/stats/icon_damage.png';
-    }
-
-    render() {
-        super.render(heroActionTemplate);
     }
 }

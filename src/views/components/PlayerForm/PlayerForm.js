@@ -37,6 +37,11 @@ export class PlayerForm extends ComponentView {
             parentView: this,
             el: this.heroStatsContainer
         });
+        if (this.#player.team === 'radiant') {
+            this.inputField.value = 'player 1';
+        } else {
+            this.inputField.value = 'player 2';
+        }
     }
 
     getNameValidation() {
@@ -82,7 +87,7 @@ export class PlayerForm extends ComponentView {
                 this.#elementSelectedHero.setAttribute('class', 'hero-avatar-button-active');
 
                 if (this.inputField.value !== '') {
-                    this.confirmationButton.disabled = false;
+                    this.validationButton.disabled = false;
                     this.validationButton.style.boxShadow = '0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7';
                 }
             });
