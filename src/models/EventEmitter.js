@@ -5,8 +5,9 @@ export class EventEmitter {
         const hasEvent = this.#storage[event] !== undefined;
         if (hasEvent) {
             this.#storage[event].push(handler);
+        } else {
+            this.#storage[event] = [handler];
         }
-        this.#storage[event] = [handler];
     }
 
     off(event, handler) {
