@@ -1,6 +1,5 @@
 /* eslint-disable max-len */
 import heroAvatarTemplate from './heroAvatarTemplate.html?raw';
-// import heroStatsTemplate from './heroStatsTemplate.html?raw';
 import template from './template.html?raw';
 import { HeroStats } from '../HeroStat/HeroStat';
 import { ComponentView } from '../ComponentView';

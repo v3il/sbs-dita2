@@ -82,21 +82,31 @@ export class BasicHero {
 
     updateState() {
         this.#spells.forEach((spell) => {
-            if (spell.isOnCoolDown()) { spell.decreaseCoolDown(); }
+            if (spell.isOnCoolDown) { spell.decreaseCoolDown(); }
         });
 
         this.#effects.forEach((effect) => {
             effect.decreaseDuration();
-            if (effect.isEnded()) { effect.removeEffect(this); }
+            if (effect.isEnded) {
+                const index = this.#effects.indexOf(effect);
+                effect.removeEffect(this);
+                this.#effects.splice(index, 1);
+            }
         });
     }
 
     takePhysicalDamage(damage) {
         this.#hitPoints -= damage * (1 - this.#armor * 0.05);
+        if (this.isDead) {
+            this.#hitPoints = 0;
+        }
     }
 
     takeMagicalDamage(damage) {
         this.#hitPoints -= damage * (1 - this.#magicResistance);
+        if (this.isDead) {
+            this.#hitPoints = 0;
+        }
     }
 
     takePureDamage(damage) {
@@ -108,7 +118,7 @@ export class BasicHero {
     }
 
     get isDead() {
-        return !this.#hitPoints > 0;
+        return this.#hitPoints <= 0;
     }
 
     getInitialDamage() {
@@ -120,30 +130,30 @@ export class BasicHero {
     }
 
     increaseHitPoints(delta) {
-        this.#hitPoints += delta;
+        this.#hitPoints = Math.round((this.#hitPoints + delta) * 10) / 10;
     }
 
     decreaseHitPoints(delta) {
-        this.#hitPoints -= delta;
+        this.#hitPoints = Math.round((this.#hitPoints - delta) * 10) / 10;
     }
 
     increaseEvasion(delta) {
-        this.#evasion += delta;
+        this.#evasion = Math.round((this.#evasion + delta) * 10) / 10;
     }
 
     decreaseEvasion(delta) {
-        this.#evasion -= delta;
+        this.#evasion = Math.round((this.#evasion - delta) * 10) / 10;
     }
     increaseArmor(delta) {
-        this.#armor += delta;
+        this.#armor = Math.round((this.#armor + delta) * 10) / 10;
     }
 
     decreaseArmor(delta) {
-        this.#armor -= delta;
+        this.#armor = Math.round((this.#armor - delta) * 10) / 10;
     }
 
     decreaseMana(delta) {
-        this.#manaPoints += delta;
+        this.#manaPoints = Math.round((this.#manaPoints + delta) * 10) / 10;
     }
 
     setSilenced(value) {
@@ -183,7 +193,7 @@ export class BasicHero {
     }
 
     get hitPoints() {
-        return this.#hitPoints;
+        return Math.round(this.#hitPoints);
     }
 
     get minDamage() {
@@ -199,7 +209,7 @@ export class BasicHero {
     }
 
     get manaPoints() {
-        return this.#manaPoints;
+        return Math.round(this.#manaPoints);
     }
 
     get maxManaPoints() {
