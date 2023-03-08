@@ -64,15 +64,12 @@ export class Game {
     async triggerSpell(spell) {
         if (spell.isActive) {
             await this.currentPlayer.useSpell(spell, this.enemyHero);
-            this.moveToNextRound();
         } else {
             spell.applyEffect();
-            this.moveToNextRound();
         }
     }
 
     triggerAttack() {
         this.currentPlayer.attack(this.enemyHero);
-        this.moveToNextRound();
     }
 }

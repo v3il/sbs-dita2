@@ -70,7 +70,7 @@ export class BasicHero {
         let damage = this.getInitialDamage();
 
         this.#attackModifiers.forEach((modifier) => {
-            damage = modifier.applyModifier(damage);
+            damage = modifier.applyModifier(damage, target);
         });
 
         return target.takePhysicalDamage(damage);
@@ -134,7 +134,12 @@ export class BasicHero {
     }
 
     decreaseHitPoints(delta) {
-        this.#hitPoints = Math.round((this.#hitPoints - delta) * 10) / 10;
+        const hitPoints = Math.round((this.#hitPoints - delta) * 10) / 10;
+        if (hitPoints > 0) {
+            this.#hitPoints = hitPoints;
+        } else {
+            this.#hitPoints = 0;
+        }
     }
 
     increaseEvasion(delta) {
@@ -153,7 +158,19 @@ export class BasicHero {
     }
 
     decreaseMana(delta) {
-        this.#manaPoints = Math.round((this.#manaPoints + delta) * 10) / 10;
+        const manaPoints = Math.round((this.#manaPoints - delta) * 10) / 10;
+        if (manaPoints > 0) {
+            this.#manaPoints = manaPoints;
+        } else {
+            this.#manaPoints = 0;
+        }
+    }
+    increaseMagicResist(delta) {
+        this.#magicResistance += delta;
+    }
+
+    decraseMagicResist(delta) {
+        this.#magicResistance -= delta;
     }
 
     setSilenced(value) {
