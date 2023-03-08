@@ -8,6 +8,7 @@ import template from './template.html?raw';
 import { game } from '../../../models';
 import { HeroGameboardAvatar } from '../../components/HeroGameboardAvatarBlock/HeroGameboardAvatar';
 import { HeroModifier } from '../../components/HeroModifier/HeroModifier';
+import { Logger } from '../../components/Logger/Logger';
 import './style.css';
 
 export class GameBoardPage extends PageView {
@@ -17,18 +18,19 @@ export class GameBoardPage extends PageView {
         this.radiantTeam = {};
         this.direTeam = {};
         this.radiantAvatar = null;
-        this.direAvatar = null;
         this.radiantHeroProgressBar = null;
-        this.direHeroProgressBar = null;
         this.radiantHeroStats = null;
-        this.direHeroStats = null;
         this.radiantHeroAction = null;
+        this.radiantPlayerStatusBar = null;
+        this.radiantHeroModifier = null;
+        this.direAvatar = null;
+        this.direHeroProgressBar = null;
+        this.direHeroStats = null;
         this.direHeroAction = null;
         this.activePlayerControl = null;
-        this.radiantPlayerStatusBar = null;
         this.direHeroProgressBar = null;
-        this.radiantHeroModifier = null;
         this.direHeroModifier = null;
+        this.logger = null;
     }
 
     teamsInit() {
@@ -76,12 +78,14 @@ export class GameBoardPage extends PageView {
 
         this.radiantHeroStats = new HeroStats({
             parentView: this,
-            el: this.radiantTeam.view.querySelector('[data-hero-stats]')
+            el: this.radiantTeam.view.querySelector('[data-hero-stats]'),
+            game
         });
 
         this.direHeroStats = new HeroStats({
             parentView: this,
-            el: this.direTeam.view.querySelector('[data-hero-stats]')
+            el: this.direTeam.view.querySelector('[data-hero-stats]'),
+            game
         });
 
         this.radiantHeroAction = new HeroAction({
@@ -138,6 +142,12 @@ export class GameBoardPage extends PageView {
             playerBoardSide: this.direTeam.view,
             parentView: this,
             el: this.direTeam.view.querySelector('[data-hero-modifier]')
+        });
+
+        this.logger = new Logger({
+            game,
+            parentView: this,
+            el: document.querySelector('[data-logger]')
         });
     }
 

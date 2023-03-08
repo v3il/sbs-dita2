@@ -17,6 +17,7 @@ export class HeroAction extends ComponentView {
         this.spellsContainer = null;
         this.spellButtonList = null;
         this.attackButton = null;
+        this.enemyHero = null;
 
         this.render();
         this.initElements();
@@ -34,6 +35,7 @@ export class HeroAction extends ComponentView {
         this.spellsContainer = this.playerBoardSide.querySelector('[data-hero-spells-container]');
         this.attackButton = this.spellsContainer.lastElementChild;
         this.spellButtonList = Array.from(this.playerBoardSide.querySelectorAll('#spell'));
+        this.enemyHero = this.player.team === 'dire' ? this.game.radiantPlayer.hero : this.game.direPlayer.hero;
     }
 
     initSpellsEvents() {
@@ -46,14 +48,32 @@ export class HeroAction extends ComponentView {
 
             this.game.events.on(`${this.player.team}_${index}_spell_apply`, ({ spell }) => {
                 if (spell.hasEnoughMana || !spell.isActive) {
+                    const enemyCurrentHP = this.enemyHero.hitPoints;
+
                     this.game.triggerSpell(spell);
 
+                    this.game.events.emit('spell', {
+                        player: this.player,
+                        spell: this.heroSpells[index],
+                        damage: enemyCurrentHP - this.enemyHero.hitPoints
+                    });
+
+                    this.game.moveToNextRound();
                     this.game.events.emit('update_progress_bars');
                 }
             });
         });
         this.game.events.on(`${this.player.team}_base_attack`, () => {
+            const enemyCurrentHP = this.enemyHero.hitPoints;
+
             this.game.triggerAttack();
+
+            this.game.events.emit('baseAttack', {
+                player: this.player,
+                damage: enemyCurrentHP - this.enemyHero.hitPoints
+            });
+
+            this.game.moveToNextRound();
             this.game.events.emit('update_progress_bars');
         });
     }

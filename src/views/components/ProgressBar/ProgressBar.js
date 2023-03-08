@@ -41,7 +41,7 @@ export class ProgressBar extends ComponentView {
         this.hpValue = this.hpBar.firstChild;
         this.hpBar.className = `${this.player.team}HitPointsContainer progressBar`;
 
-        this.game.events.on('update_progress_bars', () => {
+        this.game.events.on('trigger', () => {
             this.updateProgressBars();
         });
     }
