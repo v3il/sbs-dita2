@@ -21,19 +21,15 @@ export class HeroStats extends ComponentView {
     }
 
     updateStats() {
-        if (this.game) {
-            this.game.events.on('trigger', () => {
-                Array.from(this.heroAttributes.children).forEach((child) => {
-                    const attributeName = child.getAttribute('stat');
-                    const attrValueElement = child.querySelector('[data-stat-value]');
-                    if (attributeName === 'damage') {
-                        attrValueElement.innerHTML = `${this.hero.minDamage} - ${this.hero.maxDamage}`;
-                    } else {
-                        attrValueElement.innerHTML = this.hero[attributeName];
-                    }
-                });
-            });
-        }
+        Array.from(this.heroAttributes.children).forEach((child) => {
+            const attributeName = child.getAttribute('stat');
+            const attrValueElement = child.querySelector('[data-stat-value]');
+            if (attributeName === 'damage') {
+                attrValueElement.innerHTML = `${this.hero.minDamage} - ${this.hero.maxDamage}`;
+            } else {
+                attrValueElement.innerHTML = this.hero[attributeName];
+            }
+        });
     }
 
     showStats(hero) {
@@ -50,7 +46,11 @@ export class HeroStats extends ComponentView {
                 attrValueElement.innerHTML = hero[attributeName];
             }
         });
-        this.updateStats();
+
+        if (this.game) {
+            this.game.events.on('trigger', () => this.updateStats());
+            this.hero.events.on('update', () => this.updateStats());
+        }
     }
 
     render() {

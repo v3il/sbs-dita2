@@ -44,6 +44,9 @@ export class ProgressBar extends ComponentView {
         this.game.events.on('trigger', () => {
             this.updateProgressBars();
         });
+        this.player.events.on('update', () => {
+            this.updateProgressBars();
+        });
     }
 
     render() {
