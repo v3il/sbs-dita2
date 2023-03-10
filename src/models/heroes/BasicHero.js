@@ -65,7 +65,7 @@ export class BasicHero {
     }
 
     attack(target) {
-        if (Math.random() < this.#evasion) { return 0; }
+        if (Math.random() < target.#evasion) { return 0; }
 
         let damage = this.getInitialDamage();
 
@@ -130,7 +130,12 @@ export class BasicHero {
     }
 
     increaseHitPoints(delta) {
-        this.#hitPoints = Math.round((this.#hitPoints + delta) * 10) / 10;
+        const hitPoints = Math.round((this.#hitPoints + delta) * 10) / 10;
+        if (hitPoints > this.#maxHitPoints) {
+            this.#hitPoints = this.#maxHitPoints;
+        } else {
+            this.#hitPoints = hitPoints;
+        }
     }
 
     decreaseHitPoints(delta) {
