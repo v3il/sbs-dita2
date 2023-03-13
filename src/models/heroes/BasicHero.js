@@ -111,6 +111,9 @@ export class BasicHero {
 
     takePureDamage(damage) {
         this.#hitPoints -= damage;
+        if (this.isDead) {
+            this.#hitPoints = 0;
+        }
     }
 
     get isLeftAvatarDirection() {
