@@ -1,11 +1,11 @@
 import { vengefulSpiritSettings, VengefulSpirit } from '../models/heroes/vengefulSpirit';
-import { slardarSettings } from '../models/heroes/slardar';
-import { clockwerkSettings } from '../models/heroes/clockwerk';
-import { antiMageSettings } from '../models/heroes/antiMage';
-import { phantomAssassinSettings } from '../models/heroes/phantomAssasin';
+import { slardarSettings, Slardar } from '../models/heroes/slardar';
+import { clockwerkSettings, Clockwerk } from '../models/heroes/clockwerk';
+import { antiMageSettings, AntiMage } from '../models/heroes/antiMage';
+import { phantomAssassinSettings, PhantomAssasin } from '../models/heroes/phantomAssasin';
+import { HeroIds } from '../consts/HeroIds';
 
 export class HeroFactory {
-    //                                          //todo
     get availableHeroes() {
         return [
             vengefulSpiritSettings,
@@ -16,15 +16,14 @@ export class HeroFactory {
         ];
     }
 
-    //                                          //todo
     createHero(heroId, events) {
         switch (heroId) {
-        case 'vengefulspirit': return new VengefulSpirit(events);
-        // case 'slardar': return new Slardar();
-        // case 'clockwerk': return new Clockwerk();
-        // case 'antimage': return new AntiMage();
-        // case 'phantomasassin': return new PhantomAssasin();
-        default: return null;
+        case HeroIds.VENGEFUL_SPIRIT: return new VengefulSpirit({ events });
+        case HeroIds.SLARDAR: return new Slardar({ events });
+        case HeroIds.CLOCKWERK: return new Clockwerk({ events });
+        case HeroIds.ANTI_MAGE: return new AntiMage({ events });
+        case HeroIds.PHANTOM_ASSASIN: return new PhantomAssasin({ events });
+        default: console.log('nohero'); return null;
         }
     }
 }
