@@ -3,7 +3,6 @@ import { HeroAction } from '../../components/HeroAction/HeroAction';
 import { HeroStats } from '../../components/HeroStat/HeroStat';
 import { PlayerStatusBar } from '../../components/PlayerStatusBar/PlayerStatusBar';
 import { ProgressBar } from '../../components/ProgressBar/ProgressBar';
-import { ActivePlayerControl } from '../../components/ActivePlayerControl/ActivePlayerControl';
 import template from './template.html?raw';
 import { game } from '../../../models';
 import { HeroGameboardAvatar } from '../../components/HeroGameboardAvatarBlock/HeroGameboardAvatar';
@@ -27,7 +26,6 @@ export class GameBoardPage extends PageView {
         this.direHeroProgressBar = null;
         this.direHeroStats = null;
         this.direHeroAction = null;
-        this.activePlayerControl = null;
         this.direHeroProgressBar = null;
         this.direHeroModifier = null;
         this.logger = null;
@@ -106,12 +104,6 @@ export class GameBoardPage extends PageView {
             el: this.direTeam.view.querySelector('[data-hero-spells]')
         });
 
-        this.activePlayerControl = new ActivePlayerControl({
-            game,
-            radiantView: this.radiantTeam.view,
-            direView: this.direTeam.view
-        });
-
         this.radiantPlayerStatusBar = new PlayerStatusBar({
             game,
             player: this.radiantTeam.player,
@@ -155,11 +147,7 @@ export class GameBoardPage extends PageView {
         super.render(mountingEl);
         this.teamsInit();
 
-        this.radiantHeroProgressBar.render();
-        this.direHeroProgressBar.render();
         this.radiantHeroStats.showStats(this.radiantTeam.player.hero);
         this.direHeroStats.showStats(this.direTeam.player.hero);
-        this.radiantHeroAction.showSpellsIcons();
-        this.direHeroAction.showSpellsIcons();
     }
 }

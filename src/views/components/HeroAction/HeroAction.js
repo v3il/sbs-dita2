@@ -14,17 +14,16 @@ export class HeroAction extends ComponentView {
         this.hero = player.hero;
         this.heroSpells = player.hero.spells;
 
-        this.spellsContainer = null;
+        this.buttonsContainer = null;
         this.spellButtonList = null;
         this.attackButton = null;
         this.enemyHero = null;
+        this.areButtonsEnabled = true;
 
         this.render();
         this.initElements();
-        this.initSpellsEvents();
-        this.setSpellsAction();
-        this.showManaCost();
-        this.updateSpellCooldown();
+        this.setButtonElement();
+        this.handleButtonsState();
     }
 
     render() {
@@ -32,101 +31,137 @@ export class HeroAction extends ComponentView {
     }
 
     initElements() {
-        this.spellsContainer = this.playerBoardSide.querySelector('[data-hero-spells-container]');
-        this.attackButton = this.spellsContainer.lastElementChild;
+        this.buttonsContainer = this.playerBoardSide.querySelector('[data-hero-spells-container]');
+        this.attackButton = this.buttonsContainer.lastElementChild;
         this.spellButtonList = Array.from(this.playerBoardSide.querySelectorAll('#spell'));
         this.enemyHero = this.player.team === 'dire' ? this.game.radiantPlayer.hero : this.game.direPlayer.hero;
     }
 
-    initSpellsEvents() {
+    setButtonElement() {
         this.spellButtonList.forEach((button, index) => {
-            if (this.heroSpells[index].isActive) {
-                this.game.events.on('roundChanged', () => {
-                    this.heroSpells[index].decreaseCooldown();
-                });
-            }
+            const spell = this.heroSpells[index];
 
-            this.game.events.on(`${this.player.team}_${index}_spell_apply`, ({ spell }) => {
-                if (spell.hasEnoughMana || !spell.isActive) {
-                    const enemyCurrentHP = this.enemyHero.hitPoints;
+            this.showSpellIcon(button, spell);
+            this.showManaCost(button, spell);
+            this.addGameEvents(button, spell);
 
-                    this.game.triggerSpell(spell);
-
-                    this.game.events.emit('spell', {
-                        player: this.player,
-                        spell: this.heroSpells[index],
-                        damage: enemyCurrentHP - this.enemyHero.hitPoints
-                    });
-
-                    this.game.moveToNextRound();
-                    this.game.events.emit('update_progress_bars');
-                }
+            button.addEventListener('click', async () => {
+                await this.triggerSpell(spell, button);
             });
         });
-        this.game.events.on(`${this.player.team}_base_attack`, () => {
+
+        this.attackButton.firstElementChild.src = DotaAssetUrlManager.getAttackIconUrl();
+        this.attackButton.addEventListener('click', () => {
+            this.triggerBaseAttack();
+        });
+    }
+
+    addGameEvents(button, spell) {
+        if (spell.isActive) {
+            this.game.events.on('roundChanged', () => {
+                spell.decreaseCooldown();
+            });
+        }
+        this.game.events.on('playerChanged', () => {
+            this.updateSpellCooldown(button, spell);
+        });
+    }
+
+    triggerBaseAttack() {
+        const enemyCurrentHP = this.enemyHero.hitPoints;
+
+        this.game.triggerAttack();
+
+        this.game.events.emit('baseAttack', {
+            player: this.player,
+            damage: enemyCurrentHP - this.enemyHero.hitPoints
+        });
+
+        this.game.moveToNextRound();
+        this.game.events.emit('update_progress_bars');
+    }
+
+    async triggerSpell(spell, button) {
+        if (spell.hasEnoughMana || !spell.isActive) {
             const enemyCurrentHP = this.enemyHero.hitPoints;
 
-            this.game.triggerAttack();
+            await this.game.triggerSpell(spell);
 
-            this.game.events.emit('baseAttack', {
+            this.game.events.emit('spell', {
                 player: this.player,
+                spell,
                 damage: enemyCurrentHP - this.enemyHero.hitPoints
             });
 
             this.game.moveToNextRound();
+            this.updateSpellCooldown(button, spell);
             this.game.events.emit('update_progress_bars');
+        }
+    }
+
+    updateSpellCooldown(button, spell) {
+        const cooldownCounter = button.querySelector('[data-cooldown]');
+
+        if (spell.isActive && spell.isOnCooldown) {
+            cooldownCounter.style.zIndex = '2';
+            cooldownCounter.textContent = spell.currentCooldown;
+        } else {
+            cooldownCounter.style.zIndex = '-1';
+        }
+    }
+
+    showManaCost(button, spell) {
+        if (spell.isActive) {
+            const manacostIndicator = document.createElement('div');
+
+            manacostIndicator.className = 'manacost-indicator';
+            manacostIndicator.innerText = spell.manacost;
+            button.append(manacostIndicator);
+        }
+    }
+
+    showSpellIcon(button, spell) {
+        const image = button.firstElementChild;
+
+        image.src = DotaAssetUrlManager.getSpellUrl(spell.id);
+        image.setAttribute('title', `${spell.description}`);
+    }
+
+    handleButtonsState() {
+        if (this.player.team === 'dire') {
+            this.switchButtonsState();
+        }
+
+        this.game.events.on('playerChanged', () => {
+            this.switchButtonsState();
+        });
+
+        this.game.events.on('gameEnded', () => {
+            this.areButtonsEnabled = true;
+            this.switchButtonsState();
         });
     }
 
-    setSpellsAction() {
-        this.spellButtonList.forEach((button, index) => {
-            button.addEventListener('click', () => {
-                this.game.events.emit(`${this.player.team}_${index}_spell_apply`, {
-                    spell: this.heroSpells[index]
-                });
-            });
-        });
-        this.attackButton.addEventListener('click', () => {
-            this.game.events.emit(`${this.player.team}_base_attack`);
-        });
-    }
+    switchButtonsState() {
+        const actionButtons = Array.from(this.buttonsContainer.children);
 
-    showManaCost() {
-        this.spellButtonList.forEach((button, index) => {
-            if (this.heroSpells[index].isActive) {
-                const manacostIndicator = document.createElement('div');
+        actionButtons.forEach((element, index) => {
+            const button = element;
 
-                manacostIndicator.className = 'manacost-indicator';
-                manacostIndicator.innerText = this.heroSpells[index].manacost;
-                button.append(manacostIndicator);
+            if (this.areButtonsEnabled) {
+                button.disabled = true;
+            } else {
+                const spell = this.hero.spells[index];
+                const isAttackButton = button === this.attackButton;
+                const spellCanBeActivated = !spell?.isOnCooldown && spell?.isActive && !this.hero.isSilenced && spell?.hasEnoughMana;
+
+                if (isAttackButton || spellCanBeActivated) {
+                    button.disabled = false;
+                } else {
+                    button.disabled = true;
+                }
             }
         });
-    }
-
-    updateSpellCooldown() {
-        this.game.events.on('trigger', () => {
-            this.spellButtonList.forEach((button, index) => {
-                const spell = this.heroSpells[index];
-                const cooldownCounter = button.querySelector('[data-cooldown]');
-
-                if (spell.isActive && spell.isOnCooldown) {
-                    cooldownCounter.style.zIndex = '2';
-                    cooldownCounter.textContent = spell.currentCooldown;
-                } else {
-                    cooldownCounter.style.zIndex = '-1';
-                }
-            });
-        });
-    }
-
-    showSpellsIcons() {
-        Array.from(this.spellButtonList).forEach((button, index) => {
-            const image = button.firstElementChild;
-            const spell = this.heroSpells[index];
-
-            image.src = DotaAssetUrlManager.getSpellUrl(spell.id);
-            image.setAttribute('title', `${spell.description}`);
-        });
-        this.attackButton.firstElementChild.src = 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react//heroes/stats/icon_damage.png';
+        this.areButtonsEnabled = this.areButtonsEnabled !== true;
     }
 }

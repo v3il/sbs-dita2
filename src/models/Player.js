@@ -25,6 +25,7 @@ export class Player {
 
     setHero(hero) {
         this.hero = hero;
+        this.hero.team = this.team;
     }
 
     async useSpell(spell, target) {
