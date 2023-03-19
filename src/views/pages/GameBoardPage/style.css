@@ -5,18 +5,15 @@
     height: 100%;
 }
 
-.page-container--column {
-    flex-direction: column;
-}
-
 .page-container__board {
     display: flex;
-    flex: 1;
+    /* flex: 1; */
+    width: 90vw;
 }
 
 .page-container__part {
     width: 50%;
-    height: 100%;
+    max-height: 100%;
     padding: 24px;
 }
 
@@ -25,14 +22,14 @@
 }
 
 .page-container__logger {
-    flex-basis: 300px;
-    max-height: 300px;
+    padding: 24px;
+    flex-basis: 600px;
 }
 
 .page-container__glass {
     height: 100%;
     background: rgba(0, 0, 0, 0.4);
-    /* border-radius: 8px; */
+    border-radius: 8px;
     box-shadow: 0 4px 30px rgba(255, 255, 255, 0.342);
     backdrop-filter: blur(2px);
 }
@@ -77,7 +74,7 @@
 }
 
 .hero-game-page-avatar {
-    height: 60vh;
+    height: 55vh;
 }
 
 .data-hero-progress-bar-block {
@@ -115,6 +112,7 @@
         rgba(0, 124, 6, 1) 100%
     );
 }
+
 .radiantManaPointsContainer::before {
     width: var(--width, 0);
     content: '';
@@ -157,7 +155,6 @@
 
 .hero-action {
     width: 100%;
-    padding: 10px;
     display: flex;
     flex-wrap: wrap;
     box-sizing: border-box;
@@ -230,17 +227,17 @@
 
 .cooldownCounter {
     position: absolute;
+    z-index: -1;
     display: flex;
     align-items: center;
     justify-content: center;
     top: 0px;
     left: 0px;
-    z-index: -1;
     height: 100%;
     width: 100%;
+    font-size: 40px;
     background-color: rgba(0, 0, 0, 0.397);
     color: white;
-    font-size: 40px;
 }
 
 .hero-modifiers-container {
@@ -261,3 +258,26 @@
 .modifier-positive {
     border: 4px solid rgba(0, 160, 24, 0.548);
 }
+
+.logger-caption-container {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    height: 72px;
+    background-color: #ffffff0c;
+}
+
+.logger-messages-container {
+    display: flex;
+    flex-flow: column;
+    padding-left: 20px;
+}
+
+.logger-message-caption{
+    color: yellow;
+    padding-top: 10px;
+}
+
+/* .logger-message {
+
+} */

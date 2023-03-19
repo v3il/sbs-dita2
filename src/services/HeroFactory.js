@@ -23,7 +23,7 @@ export class HeroFactory {
         case HeroIds.CLOCKWERK: return new Clockwerk({ events });
         case HeroIds.ANTI_MAGE: return new AntiMage({ events });
         case HeroIds.PHANTOM_ASSASIN: return new PhantomAssasin({ events });
-        default: console.log('nohero'); return null;
+        default: return null;
         }
     }
 }

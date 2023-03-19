@@ -48,7 +48,7 @@ export class HeroStats extends ComponentView {
         });
 
         if (this.game) {
-            this.game.events.on('trigger', () => this.updateStats());
+            this.game.events.on('playerChanged', () => this.updateStats());
             this.hero.events.on('update', () => this.updateStats());
         }
     }

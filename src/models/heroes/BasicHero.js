@@ -27,7 +27,8 @@ export class BasicHero {
 
     #isSilenced = false;
 
-    #events; // ?
+    #events;
+    team;
 
     constructor(attrs, events) {
         this.#events = events; // ?
@@ -47,6 +48,10 @@ export class BasicHero {
     }
 
     addEffect(effect) {
+        const e = effect;
+        if (this.team === 'radiant' && !e.isPositive) {
+            e.duration += 1;
+        }
         this.#effects.push(effect);
         effect.applyEffect(this);
     }

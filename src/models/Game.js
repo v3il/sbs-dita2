@@ -51,10 +51,7 @@ export class Game {
             this.round += 1;
             this.events.emit('roundChanged', { currentPlayer: this.currentPlayer });
         }
-
         this.events.emit('playerChanged', { currentPlayer: this.currentPlayer });
-        // тріггер треба для перерахунку доступності кнопок(кд, сайленс), потом подумаю про назву
-        this.events.emit('trigger');
 
         if (this.gameEnded) {
             this.events.emit('gameEnded', { winner: this.winner });

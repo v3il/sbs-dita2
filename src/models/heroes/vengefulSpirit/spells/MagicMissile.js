@@ -3,6 +3,8 @@ import { Effect } from '../../../effects';
 
 export class MagicMissile extends ActiveSpell {
     damage = 100;
+    description = 'Enemy silenced for 2 rounds';
+    name = 'Magic Missile';
 
     constructor({ character }) {
         super({
@@ -21,7 +23,7 @@ export class MagicMissile extends ActiveSpell {
             remove: (target) => target.setSilenced(false),
             spellId: this.id,
             duration: 2,
-            description: 'Hero is silenced'
+            description: this.description
         }));
 
         super.invoke();

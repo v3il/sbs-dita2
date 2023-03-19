@@ -39,7 +39,7 @@ export class HeroModifier extends ComponentView {
     }
 
     updateHeroModifiers() {
-        this.game.events.on('trigger', () => {
+        this.game.events.on('playerChanged', () => {
             const modifiers = this.player.hero.effects;
             this.modifierContainer.innerHTML = '';
 
