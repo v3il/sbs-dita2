@@ -5,7 +5,7 @@ import { PlayerStatusBar } from '../../components/PlayerStatusBar/PlayerStatusBa
 import { ProgressBar } from '../../components/ProgressBar/ProgressBar';
 import template from './template.html?raw';
 import { game } from '../../../models';
-import { HeroGameboardAvatar } from '../../components/HeroGameboardAvatarBlock/HeroGameboardAvatar';
+import { HeroGameboardAvatar } from '../../components/HeroGameboardAvatar/HeroGameboardAvatar';
 import { HeroModifier } from '../../components/HeroModifier/HeroModifier';
 import { Logger } from '../../components/Logger/Logger';
 import './style.css';
