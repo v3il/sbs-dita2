@@ -20,7 +20,7 @@ export class WaveOfTerror extends ActiveSpell {
             remove: (target) => target.increaseArmor(5),
             spellId: this.id,
             duration: 3,
-            description: this.description
+            description: 'armor reduced by 5'
         }));
 
         super.invoke();

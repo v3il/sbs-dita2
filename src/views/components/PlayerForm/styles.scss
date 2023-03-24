@@ -11,7 +11,7 @@ $button-shadow-focus: #00ffeab7;
 
 .player-form__title {
   font-size: 36px;
-  margin-bottom: 48px;
+  margin-bottom: 20px;
 }
 
 .player-form__title.red {
@@ -28,7 +28,7 @@ $button-shadow-focus: #00ffeab7;
 
 .player-form__input {
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
 }
 
 .input:focus {
@@ -48,7 +48,7 @@ $button-shadow-focus: #00ffeab7;
   justify-content: center;
   align-items: center;
   flex-wrap: wrap;
-  gap: 20px 20px;
+  gap: 10px 10px;
 }
 
 .hero-avatar-button {
@@ -56,6 +56,7 @@ $button-shadow-focus: #00ffeab7;
   border: none;
   height:inherit;
   cursor: pointer;
+  height: 15vh;
 }
 
 .hero-avatar-button-active {

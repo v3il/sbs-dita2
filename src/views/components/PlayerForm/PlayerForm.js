@@ -75,7 +75,7 @@ export class PlayerForm extends ComponentView {
 
             this.emit('setAvatarButtonState-Passive');
             this.emit(`setAvatarButtonState-Active-${hero.id}`);
-            this.emit('checkValidationButtonState');
+            this.checkValidationButtonState();
         });
     }
 
@@ -95,20 +95,12 @@ export class PlayerForm extends ComponentView {
                 this.isPlayerNameInputed = false;
                 this.inputField.style.boxShadow = '';
             }
-            this.emit('checkValidationButtonState');
+            this.checkValidationButtonState();
         });
     }
 
     handleValidationButton() {
         this.disableElement(this.validationButton);
-
-        this.on('checkValidationButtonState', () => {
-            if (this.isHeroChosen && this.isPlayerNameInputed) {
-                this.enableElement(this.validationButton);
-            } else {
-                this.disableElement(this.validationButton);
-            }
-        });
 
         this.validationButton.addEventListener('click', () => {
             this.#player.setHero(this.selectedHero);
@@ -119,6 +111,14 @@ export class PlayerForm extends ComponentView {
             this.emit('disableAllAvatarButtons');
             this.emit('selected');
         });
+    }
+
+    checkValidationButtonState() {
+        if (this.isHeroChosen && this.isPlayerNameInputed) {
+            this.enableElement(this.validationButton);
+        } else {
+            this.disableElement(this.validationButton);
+        }
     }
 
     enableElement(elem) {

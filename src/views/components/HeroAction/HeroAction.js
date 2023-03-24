@@ -17,8 +17,8 @@ export class HeroAction extends ComponentView {
         this.buttonsContainer = null;
         this.spellButtonList = null;
         this.attackButton = null;
-        this.enemyHero = null;
-        this.areButtonsEnabled = true;
+        this.enemyPlayer = null;
+        this.areButtonsEnabled = this.player.team !== 'radiant';
 
         this.render();
         this.initElements();
@@ -34,7 +34,7 @@ export class HeroAction extends ComponentView {
         this.buttonsContainer = this.playerBoardSide.querySelector('[data-hero-spells-container]');
         this.attackButton = this.buttonsContainer.lastElementChild;
         this.spellButtonList = Array.from(this.playerBoardSide.querySelectorAll('#spell'));
-        this.enemyHero = this.player.team === 'dire' ? this.game.radiantPlayer.hero : this.game.direPlayer.hero;
+        this.enemyPlayer = this.player.team === 'dire' ? this.game.radiantPlayer : this.game.direPlayer;
     }
 
     setButtonElement() {
@@ -68,13 +68,13 @@ export class HeroAction extends ComponentView {
     }
 
     triggerBaseAttack() {
-        const enemyCurrentHP = this.enemyHero.hitPoints;
+        const enemyCurrentHP = this.enemyPlayer.hero.hitPoints;
 
         this.game.triggerAttack();
 
         this.game.events.emit('baseAttack', {
             player: this.player,
-            damage: enemyCurrentHP - this.enemyHero.hitPoints
+            damage: enemyCurrentHP - this.enemyPlayer.hero.hitPoints
         });
 
         this.game.moveToNextRound();
@@ -83,14 +83,20 @@ export class HeroAction extends ComponentView {
 
     async triggerSpell(spell, button) {
         if (spell.hasEnoughMana || !spell.isActive) {
-            const enemyCurrentHP = this.enemyHero.hitPoints;
+            const enemyCurrentHP = this.enemyPlayer.hero.hitPoints;
+            const heroEffectsBeforeSpell = {
+                enemy: this.enemyPlayer.hero.effects.length,
+                currentHero: this.hero.effects.length
+            };
 
             await this.game.triggerSpell(spell);
 
             this.game.events.emit('spell', {
-                player: this.player,
+                currentPlayer: this.player,
+                enemyPlayer: this.enemyPlayer,
                 spell,
-                damage: enemyCurrentHP - this.enemyHero.hitPoints
+                damage: enemyCurrentHP - this.enemyPlayer.hero.hitPoints,
+                effectsBeforeSpell: heroEffectsBeforeSpell
             });
 
             this.game.moveToNextRound();
@@ -124,13 +130,11 @@ export class HeroAction extends ComponentView {
         const image = button.firstElementChild;
 
         image.src = DotaAssetUrlManager.getSpellUrl(spell.id);
-        image.setAttribute('title', `${spell.description}`);
+        image.title = `${spell.description}`;
     }
 
     handleButtonsState() {
-        if (this.player.team === 'dire') {
-            this.switchButtonsState();
-        }
+        this.switchButtonsState();
 
         this.game.events.on('playerChanged', () => {
             this.switchButtonsState();

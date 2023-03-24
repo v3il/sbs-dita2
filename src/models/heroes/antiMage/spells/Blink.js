@@ -12,7 +12,7 @@ export class Blink extends ActiveSpell {
             character,
             manacost: 50,
             cooldown: 4,
-            id: 'antimage_mana_void'
+            id: 'antimage_blink'
         });
     }
 
@@ -28,7 +28,7 @@ export class Blink extends ActiveSpell {
             },
             spellId: this.id,
             duration: 3,
-            description: this.description
+            description: 'armor increased by 2, evasion by 20%'
         }));
 
         super.invoke();

@@ -34,6 +34,7 @@ export class HeroModifier extends ComponentView {
                 modifierImage.classList = 'modifier-negative modifier-icon';
             }
 
+            modifierImage.title = `${modifier.description}`;
             this.modifierContainer.append(modifierImage);
         });
     }
@@ -53,6 +54,7 @@ export class HeroModifier extends ComponentView {
                     modifierImage.classList = 'modifier-negative modifier-icon';
                 }
 
+                modifierImage.title = `${modifier.description}`;
                 this.modifierContainer.append(modifierImage);
             });
         });

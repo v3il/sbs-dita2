@@ -24,11 +24,12 @@
 .page-container__logger {
     padding: 24px;
     flex-basis: 600px;
+    max-height: 100%;
 }
 
 .page-container__glass {
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
+    background: #00000066;
     border-radius: 8px;
     box-shadow: 0 4px 30px rgba(255, 255, 255, 0.342);
     backdrop-filter: blur(2px);
@@ -71,10 +72,15 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
+    position: relative;
+flex-basis: 100px;
+    height: inherit;
+    flex-grow: 1;
 }
 
 .hero-game-page-avatar {
-    height: 55vh;
+    height: 50vh;
+
 }
 
 .data-hero-progress-bar-block {
@@ -170,8 +176,7 @@
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    min-width: 400px;
-    flex-grow: 1;
+    width: 100%;
 }
 
 .spellButton:disabled:hover {
@@ -241,6 +246,8 @@
 }
 
 .hero-modifiers-container {
+    position: absolute;
+    bottom: 0px;
     display: flex;
     gap: 10px;
 }
@@ -267,17 +274,48 @@
     background-color: #ffffff0c;
 }
 
+.log-container {
+    max-height: 100%;
+}
+
 .logger-messages-container {
+    white-space: pre-wrap;
+    height: 80svh;
     display: flex;
     flex-flow: column;
     padding-left: 20px;
+    padding-right: 10px;
+
+    overflow-y: auto;
 }
 
-.logger-message-caption{
-    color: yellow;
+.logger-message-round{
+    font-size: 18px;
+    color: rgb(255, 255, 0);
     padding-top: 10px;
 }
 
-/* .logger-message {
+.logger-message-caption{
+    color: rgb(255, 255, 161);
+    padding-top: 10px;
+}
 
-} */
+.player-view-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    height: 100%;
+}
+
+.logger-messages-container::-webkit-scrollbar {
+    width: 8px;
+  }
+  
+  .logger-messages-container::-webkit-scrollbar-track {
+    background: #00000066;
+  }
+  
+  .logger-messages-container::-webkit-scrollbar-thumb {
+    background-color: rgb(75, 40, 0);
+    border: 1px solid rgb(124, 81, 1);
+  }

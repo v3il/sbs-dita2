@@ -14,7 +14,7 @@ export class Blur extends PassiveSpell {
             apply: (target) => target.increaseEvasion(0.25),
             remove: (target) => target.decreaseEvasion(0.25),
             spellId: this.id,
-            description: this.description
+            description: 'evasion increased by 25%'
         }));
     }
 }

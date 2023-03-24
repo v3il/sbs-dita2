@@ -17,7 +17,7 @@ export class CoupDeGrace extends PassiveSpell {
             apply: (target) => target.addAttackModifier(modifier),
             remove: (target) => target.removeAttackModifier(modifier),
             spellId: this.id,
-            description: this.description
+            description: '30% chance of 150% crit'
         }));
     }
 }

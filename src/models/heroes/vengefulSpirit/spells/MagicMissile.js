@@ -23,7 +23,7 @@ export class MagicMissile extends ActiveSpell {
             remove: (target) => target.setSilenced(false),
             spellId: this.id,
             duration: 2,
-            description: this.description
+            description: 'hero is silenced'
         }));
 
         super.invoke();

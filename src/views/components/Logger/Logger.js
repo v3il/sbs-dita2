@@ -19,50 +19,77 @@ export class Logger extends ComponentView {
     }
 
     gameStartMessage() {
-        const message = this.createMessage('Game started, round 1', 'caption');
-        this.loggerMessagesContainer.append(message);
+        this.createMessage('Game started, round 1', 'round');
+        this.createMessage(`    ${this.game.radiantPlayer.name}'s turn.`, 'caption');
     }
 
     initEvents() {
         this.gameStartMessage();
 
         this.game.events.on('roundChanged', () => {
-            const message = this.createMessage(`Moving to ${this.game.round} round`, 'caption');
-
-            this.loggerMessagesContainer.append(message);
+            this.createMessage(`${this.game.round} round`, 'round');
         });
 
-        this.game.events.on('spell', ({ player, spell, damage }) => {
-            const messageContent = `${player.name} casted ${spell.name}, and dealed ${damage} damage `;
-            const message = this.createMessage(messageContent);
+        this.game.events.on('spell', ({
+            currentPlayer,
+            enemyPlayer,
+            spell,
+            damage,
+            effectsBeforeSpell
+        }) => {
+            const enemyHasNewEffect = effectsBeforeSpell.enemy !== enemyPlayer.hero.effects.length;
+            const currentHeroHasNewEffect = effectsBeforeSpell.currentHero !== currentPlayer.hero.effects.length;
+            let messageContent = `    ${currentPlayer.name} casted ${spell.name}`;
 
-            this.loggerMessagesContainer.append(message);
+            if (damage !== 0) {
+                messageContent += `, and dealed ${damage} damage `;
+            }
+
+            if (enemyHasNewEffect) {
+                const effect = enemyPlayer.hero.effects.at(-1);
+                messageContent += `\n${enemyPlayer.name} gets new negative effect for ${effect.duration} rounds`;
+                messageContent += `, ${effect.description.toLowerCase()}`;
+            }
+
+            if (currentHeroHasNewEffect) {
+                const effect = currentPlayer.hero.effects.at(-1);
+                messageContent += `\n${currentPlayer.name} gets new positive effect for ${effect.duration} rounds`;
+                messageContent += `, ${effect.description.toLowerCase()}`;
+            }
+
+            this.createMessage(messageContent);
         });
 
         this.game.events.on('baseAttack', ({ player, damage }) => {
-            const messageContent = `${player.name} used base attack, and dealed ${damage} damage `;
-            const message = this.createMessage(messageContent);
-
-            this.loggerMessagesContainer.append(message);
+            const messageContent = `    ${player.name} used base attack, and dealed ${damage} damage `;
+            this.createMessage(messageContent);
         });
 
         this.game.events.on('gameEnded', ({ winner }) => {
             const messageContent = `Game ended, the winner is ${winner.name}.`;
-            const message = this.createMessage(messageContent, 'caption');
+            this.createMessage(messageContent, 'round');
+        });
 
-            this.loggerMessagesContainer.append(message);
+        this.game.events.on('playerChanged', ({ currentPlayer }) => {
+            const messageContent = `  ${currentPlayer.name}'s turn.`;
+            this.createMessage(messageContent, 'caption');
         });
     }
 
     createMessage(text, type = null) {
-        const message = document.createElement('span');
+        const message = document.createElement('p');
         message.textContent = text;
-        if (type === 'caption') {
-            message.className = 'logger-message-caption';
-        } else {
-            message.classList = 'logger-message';
+        switch (type) {
+        case 'caption': message.className = 'logger-message-caption';
+            break;
+        case 'round': message.className = 'logger-message-round';
+            break;
+        default: message.classList = 'logger-message';
+            break;
         }
-        return message;
+
+        this.loggerMessagesContainer.append(message);
+        message.scrollIntoView();
     }
 
     render() {

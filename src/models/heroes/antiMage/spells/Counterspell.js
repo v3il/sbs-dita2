@@ -14,7 +14,7 @@ export class Counterspell extends PassiveSpell {
             apply: (target) => target.increaseMagicResist(0.35),
             remove: (target) => target.decraseMagicResist(0.35),
             spellId: this.id,
-            description: this.description
+            description: 'magical resist increased by 35%'
         }));
     }
 }

@@ -17,7 +17,7 @@ export class BashOfTheDeep extends PassiveSpell {
             apply: (target) => target.addAttackModifier(modifier),
             remove: (target) => target.removeAttackModifier(modifier),
             spellId: this.id,
-            description: this.description
+            description: 'Every 4th hit deals additional 125 damage'
         }));
     }
 }

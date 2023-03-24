@@ -21,7 +21,7 @@ export class CorrosiveHaze extends ActiveSpell {
             remove: (target) => target.increaseArmor(this.armorDelta),
             spellId: this.id,
             duration: 4,
-            description: this.description
+            description: 'armor decreased by 6'
         }));
 
         super.invoke();

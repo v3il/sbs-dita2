@@ -21,7 +21,7 @@ export class HookShot extends ActiveSpell {
             remove: (target) => target.setSilenced(false),
             duration: 2,
             spellId: this.id,
-            description: this.description
+            description: 'silence'
         }));
 
         super.invoke();

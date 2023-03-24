@@ -21,7 +21,7 @@ export class GuardianSprint extends ActiveSpell {
             remove: (target) => target.decreaseArmor(this.armorDelta),
             spellId: this.id,
             duration: 3,
-            description: this.description
+            description: 'armor increased by 4'
         }));
 
         super.invoke();
