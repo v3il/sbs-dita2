@@ -15,34 +15,14 @@ export class BatteryAssault extends ActiveSpell {
         });
     }
 
-    updateStats() {
-        this.character.events.emit('update');
-        this.enemyHero.events.emit('update');
-    }
-
     async invoke(enemyHero) {
         this.enemyHero = enemyHero;
-
         const baseDamage = 10;
 
-        enemyHero.takeMagicalDamage(baseDamage + (3 * 0));
-        await promisifiedSetTimeout(100);
-        this.updateStats();
-
-        enemyHero.takeMagicalDamage(baseDamage + (3 * 1));
-        await promisifiedSetTimeout(100);
-        this.updateStats();
-
-        enemyHero.takeMagicalDamage(baseDamage + (3 * 2));
-        await promisifiedSetTimeout(100);
-        this.updateStats();
-
-        enemyHero.takeMagicalDamage(baseDamage + (3 * 3));
-        await promisifiedSetTimeout(100);
-        this.updateStats();
-
-        enemyHero.takeMagicalDamage(baseDamage + (3 * 4));
-
+        for (let index = 0; index < 5; index++) {
+            enemyHero.takeMagicalDamage(baseDamage + (3 * index));
+            await promisifiedSetTimeout(100);
+        }
         super.invoke();
     }
 }

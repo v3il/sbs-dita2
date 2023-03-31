@@ -1,11 +1,9 @@
 import { ActiveSpell } from '../../../spells/ActiveSpell';
-import { PhantomStrikeModifier } from '../../../modifiers/PhantomStrikeModifier';
 import { promisifiedSetTimeout } from '../../../../utils/promisifiedSetTimeout';
 
 export class PhantomStrike extends ActiveSpell {
     description = 'phantom Strike';
     name = 'Phantom Strike';
-    enemyHero = null;
 
     constructor({ character }) {
         super({
@@ -16,28 +14,25 @@ export class PhantomStrike extends ActiveSpell {
         });
     }
 
-    updateStats() {
-        this.character.events.emit('update');
-        this.enemyHero.events.emit('update');
+    getModifiedBaseDamage() {
+        const isCrit = Math.random() < 0.3;
+
+        if (isCrit) {
+            return this.character.getInitialDamage() * 1.5;
+        }
+        return this.character.getInitialDamage();
     }
 
     async invoke(enemyHero) {
-        this.enemyHero = enemyHero;
+        for (let index = 0; index < 3; index++) {
+            await promisifiedSetTimeout(500);
 
-        const spellAction = PhantomStrikeModifier.create();
-
-        spellAction.getAction(enemyHero, this.character);
-        this.updateStats();
-
-        await promisifiedSetTimeout(500);
-        spellAction.getAction(enemyHero, this.character);
-        this.updateStats();
-
-        await promisifiedSetTimeout(500);
-        spellAction.getAction(enemyHero, this.character);
+            enemyHero.decreaseArmor(1);
+            enemyHero.takePhysicalDamage(this.getModifiedBaseDamage());
+            this.character.increaseHitPoints(10);
+        }
 
         enemyHero.increaseArmor(3);
-        this.updateStats();
 
         super.invoke();
     }
