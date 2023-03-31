@@ -1,4 +1,3 @@
-/* eslint-disable max-len */
 import { DotaAssetUrlManager } from '../../../services/DotaAssetUrlManager';
 import { ComponentView } from '../ComponentView';
 import heroModifierTemplate from './heroModifierTemplate.html?raw';
@@ -13,50 +12,53 @@ export class HeroModifier extends ComponentView {
         this.playerBoardSide = playerBoardSide;
 
         this.render();
+        this.init();
+        this.showHeroModifiers();
+    }
 
+    init() {
         this.modifierContainer = this.playerBoardSide.querySelector('[data-hero-modifiers]');
 
-        this.showHeroModifiers();
-        this.updateHeroModifiers();
+        this.player.events.on('removeEffectIcon', ({ effect }) => {
+            this.removeEffectIcon(effect);
+        });
+
+        this.player.events.on('addEffectIcon', ({ effect }) => {
+            this.addEffectIcon(effect);
+        });
     }
 
     showHeroModifiers() {
         const modifiers = this.player.hero.effects;
-        this.modifierContainer.innerHTML = '';
 
-        modifiers.forEach((modifier) => {
-            const modifierImage = document.createElement('img');
-            modifierImage.src = DotaAssetUrlManager.getSpellUrl(modifier.spellId);
-
-            if (modifier.isPositive) {
-                modifierImage.classList = 'modifier-positive modifier-icon';
-            } else {
-                modifierImage.classList = 'modifier-negative modifier-icon';
-            }
-
-            modifierImage.title = `${modifier.description}`;
-            this.modifierContainer.append(modifierImage);
+        modifiers.forEach((effect) => {
+            this.addEffectIcon(effect);
         });
     }
 
-    updateHeroModifiers() {
-        this.game.events.on('playerChanged', () => {
-            const modifiers = this.player.hero.effects;
-            this.modifierContainer.innerHTML = '';
+    addEffectIcon(effect) {
+        const modifierImage = document.createElement('img');
 
-            modifiers.forEach((modifier) => {
-                const modifierImage = document.createElement('img');
-                modifierImage.src = DotaAssetUrlManager.getSpellUrl(modifier.spellId);
+        modifierImage.src = DotaAssetUrlManager.getSpellUrl(effect.spellId);
+        modifierImage.setAttribute('id', `${effect.id}`);
 
-                if (modifier.isPositive) {
-                    modifierImage.classList = 'modifier-positive modifier-icon';
-                } else {
-                    modifierImage.classList = 'modifier-negative modifier-icon';
-                }
+        if (effect.isPositive) {
+            modifierImage.classList = 'modifier-positive modifier-icon';
+        } else {
+            modifierImage.classList = 'modifier-negative modifier-icon';
+        }
 
-                modifierImage.title = `${modifier.description}`;
-                this.modifierContainer.append(modifierImage);
-            });
+        modifierImage.title = `${effect.description}`;
+        this.modifierContainer.append(modifierImage);
+    }
+
+    removeEffectIcon(effect) {
+        const effectIcons = Array.from(this.modifierContainer.children);
+
+        effectIcons.forEach((effectIcon) => {
+            if (+effectIcon.id === effect.id) {
+                effectIcon.remove();
+            }
         });
     }
 
