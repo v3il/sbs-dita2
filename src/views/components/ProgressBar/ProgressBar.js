@@ -3,56 +3,47 @@ import { ComponentView } from '../ComponentView';
 
 export class ProgressBar extends ComponentView {
     constructor({
-        game, player, playerBoardSide, parentView, el
+        hero, type, parentView, el, classes
     }) {
-        super({ parentView, el });
+        super({ parentView, el, classes });
 
-        this.playerBoardSide = playerBoardSide;
-        this.player = player;
-        this.game = game;
+        this.hero = hero;
+        this.type = type;
 
-        this.manaBar = null;
-        this.hpBar = null;
-        this.manaValue = null;
-        this.hpValue = null;
+        this.maxValue = null;
+        this.textValueContainer = null;
         this.render();
-    }
-
-    updateProgressBars() {
-        const maxHP = this.player.hero.maxHitPoints;
-        const currHP = this.player.hero.hitPoints;
-        const maxMP = this.player.hero.maxManaPoints;
-        const currMP = this.player.hero.manaPoints;
-        const relativeMP = Math.round((currMP / maxMP) * 100);
-        const relativeHP = Math.round((currHP / maxHP) * 100);
-
-        this.manaBar.style.setProperty('--width', `${relativeMP}%`);
-        this.hpBar.style.setProperty('--width', `${relativeHP}%`);
-
-        this.manaValue.textContent = `${currMP}/${maxMP}`;
-        this.hpValue.textContent = `${currHP}/${maxHP}`;
+        this.init();
     }
 
     init() {
-        this.manaBar = this.playerBoardSide.querySelector('[data-mana-bar]');
-        this.manaValue = this.manaBar.firstChild;
-        this.manaBar.className = `${this.player.team}ManaPointsContainer progressBar`;
+        this.textValueContainer = this.el.firstElementChild;
 
-        this.hpBar = this.playerBoardSide.querySelector('[data-hp-bar]');
-        this.hpValue = this.hpBar.firstChild;
-        this.hpBar.className = `${this.player.team}HitPointsContainer progressBar`;
+        this.el.style.setProperty('--width', '100%');
+        this.textValueContainer.textContent = `${this.maxValue}/${this.maxValue}`;
 
-        this.game.events.on('playerChanged', () => {
-            this.updateProgressBars();
-        });
-        this.player.events.on('update', () => {
-            this.updateProgressBars();
-        });
+        if (this.type === 'mana') {
+            this.maxValue = this.hero.maxManaPoints;
+
+            this.hero.events.on('updateManaBar', ({ currentMana }) => {
+                const relativeMP = Math.round((currentMana / this.maxValue) * 100);
+
+                this.el.style.setProperty('--width', `${relativeMP}%`);
+                this.textValueContainer.textContent = `${currentMana}/${this.maxValue}`;
+            });
+        } else {
+            this.maxValue = this.hero.maxHitPoints;
+
+            this.hero.events.on('updateHPBar', ({ currentHP }) => {
+                const relativeHP = Math.round((currentHP / this.maxValue) * 100);
+
+                this.el.style.setProperty('--width', `${relativeHP}%`);
+                this.textValueContainer.textContent = `${currentHP}/${this.maxValue}`;
+            });
+        }
     }
 
     render() {
         super.render(progressBarTempalate);
-        this.init();
-        this.updateProgressBars();
     }
 }
