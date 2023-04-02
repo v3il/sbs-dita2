@@ -1,79 +1,113 @@
+/* eslint-disable no-param-reassign */
 import { ComponentView } from '../ComponentView';
 import loggerTemplate from './loggerTemplate.html?raw';
+import { game } from '../../../models';
 
 export class Logger extends ComponentView {
-    constructor({ game, parentView, el }) {
+    constructor({
+        radiantPlayer,
+        direPlayer,
+        parentView,
+        el
+    }) {
         super({ parentView, el });
+        this.radiantPlayer = radiantPlayer;
+        this.direPlayer = direPlayer;
 
         this.render();
-        this.game = game;
-        this.loggerContainer = null;
-        this.loggerMessagesContainer = null;
-        this.initElements();
+
+        this.loggerContainer = this.el;
+        this.loggerMessagesContainer = this.el.querySelector('[data-log-messages-container]');
+
+        this.radiant = {
+            player: this.radiantPlayer,
+            hasNewEffect: false,
+            effect: null
+        };
+        this.dire = {
+            player: this.direPlayer,
+            hasNewEffect: false,
+            effect: null
+        };
+
         this.initEvents();
     }
 
-    initElements() {
-        this.loggerContainer = document.querySelector('[data-logger]');
-        this.loggerMessagesContainer = document.querySelector('[data-log-messages-container]');
-    }
-
     gameStartMessage() {
-        this.createMessage('Game started, round 1', 'round');
-        this.createMessage(`    ${this.game.radiantPlayer.name}'s turn.`, 'caption');
+        this.createMessage('Game started, round 1', 'newRound');
+        this.createMessage(`  ${game.radiantPlayer.name}'s turn.`, 'caption');
     }
 
     initEvents() {
         this.gameStartMessage();
 
-        this.game.events.on('roundChanged', () => {
-            this.createMessage(`${this.game.round} round`, 'round');
+        this.radiantPlayer.events.on('effectAdded', ({ effect }) => {
+            this.radiant.hasNewEffect = true;
+            this.radiant.effect = effect;
         });
 
-        this.game.events.on('spell', ({
-            currentPlayer,
-            enemyPlayer,
-            spell,
-            damage,
-            effectsBeforeSpell
-        }) => {
-            const enemyHasNewEffect = effectsBeforeSpell.enemy !== enemyPlayer.hero.effects.length;
-            const currentHeroHasNewEffect = effectsBeforeSpell.currentHero !== currentPlayer.hero.effects.length;
-            let messageContent = `    ${currentPlayer.name} casted ${spell.name}`;
+        this.direPlayer.events.on('effectAdded', ({ effect }) => {
+            this.dire.hasNewEffect = true;
+            this.dire.effect = effect;
+        });
 
-            if (damage !== 0) {
-                messageContent += `, and dealed ${damage} damage `;
-            }
+        game.events.on('roundChanged', () => {
+            this.createMessage(`${game.round} round`, 'newRound');
+        });
 
-            if (enemyHasNewEffect) {
-                const effect = enemyPlayer.hero.effects.at(-1);
-                messageContent += `\n${enemyPlayer.name} gets new negative effect for ${effect.duration} rounds`;
-                messageContent += `, ${effect.description.toLowerCase()}`;
-            }
-
-            if (currentHeroHasNewEffect) {
-                const effect = currentPlayer.hero.effects.at(-1);
-                messageContent += `\n${currentPlayer.name} gets new positive effect for ${effect.duration} rounds`;
-                messageContent += `, ${effect.description.toLowerCase()}`;
-            }
+        this.radiantPlayer.events.on('spell', ({ spell, damage }) => {
+            const messageContent = this.createSpellLogContent(this.dire, this.radiant, spell, damage);
 
             this.createMessage(messageContent);
         });
 
-        this.game.events.on('baseAttack', ({ player, damage }) => {
-            const messageContent = `    ${player.name} used base attack, and dealed ${damage} damage `;
+        this.direPlayer.events.on('spell', ({ spell, damage }) => {
+            const messageContent = this.createSpellLogContent(this.radiant, this.dire, spell, damage);
+
             this.createMessage(messageContent);
         });
 
-        this.game.events.on('gameEnded', ({ winner }) => {
+        this.radiantPlayer.events.on('baseAttack', ({ damage }) => {
+            const messageContent = `    ${this.radiantPlayer.name} used base attack, and dealed ${damage} damage `;
+            this.createMessage(messageContent);
+        });
+
+        this.direPlayer.events.on('baseAttack', ({ damage }) => {
+            const messageContent = `    ${this.direPlayer.name} used base attack, and dealed ${damage} damage `;
+            this.createMessage(messageContent);
+        });
+
+        game.events.on('gameEnded', ({ winner }) => {
             const messageContent = `Game ended, the winner is ${winner.name}.`;
-            this.createMessage(messageContent, 'round');
+            this.createMessage(messageContent, 'newRound');
         });
 
-        this.game.events.on('playerChanged', ({ currentPlayer }) => {
+        game.events.on('playerChanged', ({ currentPlayer }) => {
             const messageContent = `  ${currentPlayer.name}'s turn.`;
             this.createMessage(messageContent, 'caption');
         });
+    }
+
+    createSpellLogContent(target, attaker, spell, damage) {
+        let messageContent = `    ${attaker.player.name} casted ${spell.name}`;
+
+        if (damage !== 0) {
+            messageContent += `, and dealed ${damage} damage `;
+        }
+
+        if (target.hasNewEffect) {
+            messageContent += `\n${target.player.name} gets new negative effect for ${target.effect.duration} rounds`;
+            messageContent += `, ${target.effect.description.toLowerCase()}`;
+            target.hasNewEffect = false;
+        }
+
+        if (attaker.hasNewEffect) {
+            messageContent += `\n${attaker.player.name} gets new positive effect for ${attaker.effect.duration} rounds`;
+            messageContent += `, ${attaker.effect.description.toLowerCase()}`;
+            attaker.hasNewEffect = false;
+        }
+
+        return messageContent;
     }
 
     createMessage(text, type = null) {
@@ -82,7 +116,7 @@ export class Logger extends ComponentView {
         switch (type) {
         case 'caption': message.className = 'logger-message-caption';
             break;
-        case 'round': message.className = 'logger-message-round';
+        case 'newRound': message.className = 'logger-message-round';
             break;
         default: message.classList = 'logger-message';
             break;
