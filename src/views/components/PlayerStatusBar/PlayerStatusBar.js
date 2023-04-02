@@ -1,19 +1,18 @@
 import { ComponentView } from '../ComponentView';
 import playerStatusBarTemplate from './playerStatusBarTemplate.html?raw';
+import { game } from '../../../models';
 
 export class PlayerStatusBar extends ComponentView {
     constructor({
-        game, player, playerBoardSide, parentView, el
+        player, parentView, el
     }) {
         super({ parentView, el });
         this.render();
 
-        this.game = game;
         this.player = player;
-        this.playerBoardSide = playerBoardSide;
-        this.statusBarContainer = playerBoardSide.querySelector('[data-status-bar]');
+        this.statusBarContainer = this.el;
         this.playerNameContainer = this.statusBarContainer.firstElementChild;
-        this.playerStatusIndicator = null;
+        this.playerStatusIndicator = this.playerNameContainer.nextElementSibling;
 
         this.showName();
         this.showStatus();
@@ -21,7 +20,7 @@ export class PlayerStatusBar extends ComponentView {
     }
 
     handleStatusIndicator() {
-        this.game.events.on('gameEnded', ({ winner }) => {
+        game.events.on('gameEnded', ({ winner }) => {
             if (winner === this.player) {
                 this.playerStatusIndicator.innerHTML = 'You won!';
                 this.playerStatusIndicator.style.visibility = 'visible';
@@ -30,7 +29,7 @@ export class PlayerStatusBar extends ComponentView {
             }
         });
 
-        this.game.events.on('playerChanged', () => {
+        game.events.on('playerChanged', () => {
             if (this.playerStatusIndicator.style.visibility === 'hidden') {
                 this.playerStatusIndicator.style.visibility = 'visible';
             } else {
@@ -48,16 +47,11 @@ export class PlayerStatusBar extends ComponentView {
     }
 
     showStatus() {
-        this.playerStatusIndicator = document.createElement('div');
-
         this.playerStatusIndicator.innerHTML = 'Your turn';
-        this.playerStatusIndicator.className = 'player-status-indicator';
 
         if (this.player.team === 'dire') {
-            this.playerNameContainer.before(this.playerStatusIndicator);
+            this.statusBarContainer.style.flexFlow = 'row-reverse';
             this.playerStatusIndicator.style.visibility = 'hidden';
-        } else {
-            this.playerNameContainer.after(this.playerStatusIndicator);
         }
     }
 
