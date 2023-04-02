@@ -4,12 +4,11 @@ import heroModifierTemplate from './heroModifierTemplate.html?raw';
 
 export class HeroModifier extends ComponentView {
     constructor({
-        game, player, playerBoardSide, parentView, el
+        player, parentView, el
     }) {
         super({ parentView, el });
-        this.game = game;
+
         this.player = player;
-        this.playerBoardSide = playerBoardSide;
 
         this.render();
         this.init();
@@ -17,14 +16,20 @@ export class HeroModifier extends ComponentView {
     }
 
     init() {
-        this.modifierContainer = this.playerBoardSide.querySelector('[data-hero-modifiers]');
+        this.modifiersContainer = this.el;
 
-        this.player.events.on('removeEffectIcon', ({ effect }) => {
-            this.removeEffectIcon(effect);
+        this.player.events.on('effectRemoved', ({ effect }) => {
+            this.removeModifierIcon(effect);
         });
 
-        this.player.events.on('addEffectIcon', ({ effect }) => {
-            this.addEffectIcon(effect);
+        this.player.events.on('effectAdded', ({ effect }) => {
+            const effectImageContainer = this.addModifierIcon(effect);
+
+            effect.events.on('durationChanged', () => {
+                effectImageContainer.style.setProperty('--duration', JSON.stringify(`${effect.currentDuration}`));
+                effectImageContainer.title = `${effect.description},
+effect lasts for ${effect.currentDuration} more round(s)`;
+            });
         });
     }
 
@@ -32,28 +37,40 @@ export class HeroModifier extends ComponentView {
         const modifiers = this.player.hero.effects;
 
         modifiers.forEach((effect) => {
-            this.addEffectIcon(effect);
+            this.addModifierIcon(effect);
         });
     }
 
-    addEffectIcon(effect) {
+    addModifierIcon(effect) {
         const modifierImage = document.createElement('img');
+        const effectImageContainer = document.createElement('div');
 
         modifierImage.src = DotaAssetUrlManager.getSpellUrl(effect.spellId);
-        modifierImage.setAttribute('id', `${effect.id}`);
+        effectImageContainer.setAttribute('id', `${effect.id}`);
+        effectImageContainer.classList = 'modifier-icon';
 
-        if (effect.isPositive) {
-            modifierImage.classList = 'modifier-positive modifier-icon';
+        if (effect.duration) {
+            effectImageContainer.style.setProperty('--duration', JSON.stringify(`${effect.duration}`));
+            effectImageContainer.title = `${effect.description},
+ effect lasts for ${effect.duration} round(s)`;
         } else {
-            modifierImage.classList = 'modifier-negative modifier-icon';
+            effectImageContainer.title = `${effect.description}, effect is permanent`;
         }
 
-        modifierImage.title = `${effect.description}`;
-        this.modifierContainer.append(modifierImage);
+        if (effect.isPositive) {
+            modifierImage.classList = 'modifier-positive modifier-image';
+        } else {
+            modifierImage.classList = 'modifier-negative modifier-image';
+        }
+
+        effectImageContainer.append(modifierImage);
+        this.modifiersContainer.append(effectImageContainer);
+
+        return effectImageContainer;
     }
 
-    removeEffectIcon(effect) {
-        const effectIcons = Array.from(this.modifierContainer.children);
+    removeModifierIcon(effect) {
+        const effectIcons = Array.from(this.modifiersContainer.children);
 
         effectIcons.forEach((effectIcon) => {
             if (+effectIcon.id === effect.id) {
