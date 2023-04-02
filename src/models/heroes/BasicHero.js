@@ -28,10 +28,9 @@ export class BasicHero {
     #isSilenced = false;
 
     #events;
-    team;
 
     constructor(attrs, events) {
-        this.#events = events; // ?
+        this.#events = events;
         this.#id = attrs.id;
         this.#name = attrs.name;
         this.#avatarDirection = attrs.avatarDirection;
@@ -48,17 +47,17 @@ export class BasicHero {
     }
 
     addEffect(effect) {
-        const e = effect;
-        if (this.team === 'radiant' && !e.isPositive) {
-            e.duration += 1;
-        }
         this.#effects.push(effect);
         effect.applyEffect(this);
+
+        this.events.emit('effectAdded', ({ effect }));
     }
 
     removeEffect(effect) {
         this.#effects = this.#effects.filter((e) => e !== effect);
         effect.removeEffect(this);
+
+        this.events.emit('effectRemoved', ({ effect }));
     }
 
     addAttackModifier(modifier) {
@@ -72,61 +71,52 @@ export class BasicHero {
     attack(target) {
         if (Math.random() < target.#evasion) { return 0; }
 
+        const targetInitialHP = target.hitPoints;
         let damage = this.getInitialDamage();
 
         this.#attackModifiers.forEach((modifier) => {
             damage = modifier.applyModifier(damage, target);
         });
 
-        return target.takePhysicalDamage(damage);
+        target.takePhysicalDamage(damage);
+        this.events.emit('baseAttack', { damage: targetInitialHP - target.hitPoints });
+
+        return damage;
     }
 
     async useSpell(spell, target) {
+        const targetInitialHP = target.hitPoints;
+
         await spell.invoke(target);
+
+        this.events.emit('spell', { spell, damage: targetInitialHP - target.hitPoints });
     }
 
     updateState() {
         this.#spells.forEach((spell) => {
-            if (spell.isOnCoolDown) { spell.decreaseCoolDown(); }
+            if (spell.isOnCooldown) {
+                spell.decreaseCooldown();
+            }
         });
 
         this.#effects.forEach((effect) => {
             effect.decreaseDuration();
             if (effect.isEnded) {
-                const index = this.#effects.indexOf(effect);
-                effect.removeEffect(this);
-                this.#effects.splice(index, 1);
+                this.removeEffect(effect);
             }
         });
     }
 
     takePhysicalDamage(damage) {
-        this.#hitPoints -= damage * (1 - this.#armor * 0.05);
-        if (this.isDead) {
-            this.#hitPoints = 0;
-        }
+        this.decreaseHitPoints(damage * (1 - this.#armor * 0.05));
     }
 
     takeMagicalDamage(damage) {
-        this.#hitPoints -= damage * (1 - this.#magicResistance);
-        if (this.isDead) {
-            this.#hitPoints = 0;
-        }
+        this.decreaseHitPoints(damage * (1 - this.#magicResistance));
     }
 
     takePureDamage(damage) {
-        this.#hitPoints -= damage;
-        if (this.isDead) {
-            this.#hitPoints = 0;
-        }
-    }
-
-    get isLeftAvatarDirection() {
-        return this.#avatarDirection === 'left';
-    }
-
-    get isDead() {
-        return this.#hitPoints <= 0;
+        this.decreaseHitPoints(damage);
     }
 
     getInitialDamage() {
@@ -138,36 +128,42 @@ export class BasicHero {
     }
 
     increaseHitPoints(delta) {
-        const hitPoints = Math.round((this.#hitPoints + delta) * 10) / 10;
+        const hitPoints = Math.round(this.#hitPoints + delta);
         if (hitPoints > this.#maxHitPoints) {
             this.#hitPoints = this.#maxHitPoints;
         } else {
             this.#hitPoints = hitPoints;
         }
+
+        this.events.emit('updateHPBar', { currentHP: this.#hitPoints });
     }
 
     decreaseHitPoints(delta) {
-        const hitPoints = Math.round((this.#hitPoints - delta) * 10) / 10;
+        const hitPoints = Math.round(this.#hitPoints - delta);
         if (hitPoints > 0) {
             this.#hitPoints = hitPoints;
         } else {
             this.#hitPoints = 0;
         }
+
+        this.events.emit('updateHPBar', { currentHP: this.#hitPoints });
     }
 
     increaseEvasion(delta) {
-        this.#evasion = Math.round((this.#evasion + delta) * 10) / 10;
+        this.#evasion = +(this.#evasion + delta).toFixed(1);
     }
 
     decreaseEvasion(delta) {
-        this.#evasion = Math.round((this.#evasion - delta) * 10) / 10;
+        this.#evasion = +(this.#evasion - delta).toFixed(1);
     }
     increaseArmor(delta) {
-        this.#armor = Math.round((this.#armor + delta) * 10) / 10;
+        this.#armor = +(this.#armor + delta).toFixed(1);
+        this.events.emit('updateStats');
     }
 
     decreaseArmor(delta) {
-        this.#armor = Math.round((this.#armor - delta) * 10) / 10;
+        this.#armor = +(this.#armor - delta).toFixed(1);
+        this.events.emit('updateStats');
     }
 
     decreaseMana(delta) {
@@ -177,7 +173,10 @@ export class BasicHero {
         } else {
             this.#manaPoints = 0;
         }
+
+        this.events.emit('updateManaBar', { currentMana: this.#manaPoints });
     }
+
     increaseMagicResist(delta) {
         this.#magicResistance += delta;
     }
@@ -216,6 +215,14 @@ export class BasicHero {
 
     get intelligence() {
         return this.#intelligence;
+    }
+
+    get isLeftAvatarDirection() {
+        return this.#avatarDirection === 'left';
+    }
+
+    get isDead() {
+        return this.#hitPoints <= 0;
     }
 
     get armor() {
