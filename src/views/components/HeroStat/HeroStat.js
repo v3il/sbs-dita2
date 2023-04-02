@@ -2,33 +2,26 @@ import { ComponentView } from '../ComponentView';
 import heroStatsTemplate from './heroStatsTemplate.html?raw';
 
 export class HeroStats extends ComponentView {
-    constructor({ parentView, el, game = null }) {
+    constructor({ player, parentView, el }) {
         super({ parentView, el });
-        this.game = game;
+        this.player = player || null;
         this.el = el;
         this.hero = null;
         this.heroAttributes = null;
         this.heroName = null;
+        this.armorAttribute = null;
 
         this.render();
-        this.initElements();
+        this.init();
     }
 
-    initElements() {
+    init() {
         this.el.style.visibility = 'hidden';
         this.heroName = this.el.querySelector('[data-hero-name]');
         this.heroAttributes = this.el.querySelector('[data-hero-stats]');
-    }
 
-    updateStats() {
-        Array.from(this.heroAttributes.children).forEach((child) => {
-            const attributeName = child.getAttribute('stat');
-            const attrValueElement = child.querySelector('[data-stat-value]');
-            if (attributeName === 'damage') {
-                attrValueElement.innerHTML = `${this.hero.minDamage} - ${this.hero.maxDamage}`;
-            } else {
-                attrValueElement.innerHTML = this.hero[attributeName];
-            }
+        this.player?.events.on('updateStats', () => {
+            this.armorAttribute.innerHTML = this.hero.armor;
         });
     }
 
@@ -40,17 +33,17 @@ export class HeroStats extends ComponentView {
         Array.from(this.heroAttributes.children).forEach((child) => {
             const attributeName = child.getAttribute('stat');
             const attrValueElement = child.querySelector('[data-stat-value]');
+
             if (attributeName === 'damage') {
                 attrValueElement.innerHTML = `${hero.minDamage} - ${hero.maxDamage}`;
             } else {
                 attrValueElement.innerHTML = hero[attributeName];
             }
-        });
 
-        if (this.game) {
-            this.game.events.on('playerChanged', () => this.updateStats());
-            this.hero.events.on('update', () => this.updateStats());
-        }
+            if (attributeName === 'armor') {
+                this.armorAttribute = child;
+            }
+        });
     }
 
     render() {
