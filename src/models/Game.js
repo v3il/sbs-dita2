@@ -64,9 +64,12 @@ export class Game {
         } else {
             spell.applyEffect();
         }
+
+        this.moveToNextRound();
     }
 
     triggerAttack() {
         this.currentPlayer.attack(this.enemyHero);
+        this.moveToNextRound();
     }
 }
