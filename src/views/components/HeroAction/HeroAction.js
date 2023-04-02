@@ -1,16 +1,14 @@
-/* eslint-disable max-len */
 import { DotaAssetUrlManager } from '../../../services/DotaAssetUrlManager';
 import { ComponentView } from '../ComponentView';
+import { game } from '../../../models';
 import heroActionTemplate from './heroActionTemplate.html?raw';
 
 export class HeroAction extends ComponentView {
     constructor({
-        game, player, playerBoardSide, parentView, el
+        player, parentView, el
     }) {
         super({ parentView, el });
-        this.game = game;
         this.player = player;
-        this.playerBoardSide = playerBoardSide;
         this.hero = player.hero;
         this.heroSpells = player.hero.spells;
 
@@ -31,10 +29,10 @@ export class HeroAction extends ComponentView {
     }
 
     initElements() {
-        this.buttonsContainer = this.playerBoardSide.querySelector('[data-hero-spells-container]');
+        this.buttonsContainer = this.el;
         this.attackButton = this.buttonsContainer.lastElementChild;
-        this.spellButtonList = Array.from(this.playerBoardSide.querySelectorAll('#spell'));
-        this.enemyPlayer = this.player.team === 'dire' ? this.game.radiantPlayer : this.game.direPlayer;
+        this.spellButtonList = Array.from(this.buttonsContainer.querySelectorAll('#spell'));
+        this.enemyPlayer = this.player.team === 'dire' ? game.radiantPlayer : game.direPlayer;
     }
 
     setButtonElement() {
@@ -43,66 +41,22 @@ export class HeroAction extends ComponentView {
 
             this.showSpellIcon(button, spell);
             this.showManaCost(button, spell);
-            this.addGameEvents(button, spell);
+
+            game.events.on('playerChanged', () => {
+                this.updateSpellCooldown(button, spell);
+            });
 
             button.addEventListener('click', async () => {
-                await this.triggerSpell(spell, button);
+                if (spell.hasEnoughMana || !spell.isActive) {
+                    await game.triggerSpell(spell);
+                }
             });
         });
 
         this.attackButton.firstElementChild.src = DotaAssetUrlManager.getAttackIconUrl();
         this.attackButton.addEventListener('click', () => {
-            this.triggerBaseAttack();
+            game.triggerAttack();
         });
-    }
-
-    addGameEvents(button, spell) {
-        if (spell.isActive) {
-            this.game.events.on('roundChanged', () => {
-                spell.decreaseCooldown();
-            });
-        }
-        this.game.events.on('playerChanged', () => {
-            this.updateSpellCooldown(button, spell);
-        });
-    }
-
-    triggerBaseAttack() {
-        const enemyCurrentHP = this.enemyPlayer.hero.hitPoints;
-
-        this.game.triggerAttack();
-
-        this.game.events.emit('baseAttack', {
-            player: this.player,
-            damage: enemyCurrentHP - this.enemyPlayer.hero.hitPoints
-        });
-
-        this.game.moveToNextRound();
-        this.game.events.emit('update_progress_bars');
-    }
-
-    async triggerSpell(spell, button) {
-        if (spell.hasEnoughMana || !spell.isActive) {
-            const enemyCurrentHP = this.enemyPlayer.hero.hitPoints;
-            const heroEffectsBeforeSpell = {
-                enemy: this.enemyPlayer.hero.effects.length,
-                currentHero: this.hero.effects.length
-            };
-
-            await this.game.triggerSpell(spell);
-
-            this.game.events.emit('spell', {
-                currentPlayer: this.player,
-                enemyPlayer: this.enemyPlayer,
-                spell,
-                damage: enemyCurrentHP - this.enemyPlayer.hero.hitPoints,
-                effectsBeforeSpell: heroEffectsBeforeSpell
-            });
-
-            this.game.moveToNextRound();
-            this.updateSpellCooldown(button, spell);
-            this.game.events.emit('update_progress_bars');
-        }
     }
 
     updateSpellCooldown(button, spell) {
@@ -136,11 +90,11 @@ export class HeroAction extends ComponentView {
     handleButtonsState() {
         this.switchButtonsState();
 
-        this.game.events.on('playerChanged', () => {
+        game.events.on('playerChanged', () => {
             this.switchButtonsState();
         });
 
-        this.game.events.on('gameEnded', () => {
+        game.events.on('gameEnded', () => {
             this.areButtonsEnabled = true;
             this.switchButtonsState();
         });
@@ -157,7 +111,8 @@ export class HeroAction extends ComponentView {
             } else {
                 const spell = this.hero.spells[index];
                 const isAttackButton = button === this.attackButton;
-                const spellCanBeActivated = !spell?.isOnCooldown && spell?.isActive && !this.hero.isSilenced && spell?.hasEnoughMana;
+                const spellCanBeActivated = !spell?.isOnCooldown && spell?.isActive
+                && !this.hero.isSilenced && spell?.hasEnoughMana;
 
                 if (isAttackButton || spellCanBeActivated) {
                     button.disabled = false;
