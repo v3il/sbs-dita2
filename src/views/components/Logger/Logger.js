@@ -127,6 +127,6 @@ export class Logger extends ComponentView {
     }
 
     render() {
-        super.render(loggerTemplate);
+        super.render(loggerTemplate); //    test
     }
 }
