@@ -253,9 +253,26 @@ flex-basis: 100px;
 }
 
 .modifier-icon {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modifier-icon:before {
+    font-size: 1.2em;
+    position: absolute;
+    z-index: 2;
+    content: var(--duration, 'perm');
+    color: rgb(255, 255, 255);
+    border-radius: 10%;
+}
+
+.modifier-image {
     width: 50px;
     height: 50px;
     border-radius: 50%;
+    position: relative;
 }
 
 .modifier-negative {
