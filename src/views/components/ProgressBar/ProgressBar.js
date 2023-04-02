@@ -3,12 +3,12 @@ import { ComponentView } from '../ComponentView';
 
 export class ProgressBar extends ComponentView {
     constructor({
-        hero, type, parentView, el, classes
+        hero, parentView, el, classes
     }) {
         super({ parentView, el, classes });
 
         this.hero = hero;
-        this.type = type;
+        this.barType = classes[0].includes('Mana') ? 'mana' : 'hp';
 
         this.maxValue = null;
         this.textValueContainer = null;
@@ -19,10 +19,7 @@ export class ProgressBar extends ComponentView {
     init() {
         this.textValueContainer = this.el.firstElementChild;
 
-        this.el.style.setProperty('--width', '100%');
-        this.textValueContainer.textContent = `${this.maxValue}/${this.maxValue}`;
-
-        if (this.type === 'mana') {
+        if (this.barType === 'mana') {
             this.maxValue = this.hero.maxManaPoints;
 
             this.hero.events.on('updateManaBar', ({ currentMana }) => {
@@ -41,6 +38,9 @@ export class ProgressBar extends ComponentView {
                 this.textValueContainer.textContent = `${currentHP}/${this.maxValue}`;
             });
         }
+
+        this.el.style.setProperty('--width', '100%');
+        this.textValueContainer.textContent = `${this.maxValue}/${this.maxValue}`;
     }
 
     render() {
