@@ -5,28 +5,25 @@ import heroGameboardAvatarTemplate from './heroGameboardAvatarTemplate.html?raw'
 
 export class HeroGameboardAvatar extends ComponentView {
     constructor({
-        game, player, playerBoardSide, parentView, el
+        player, parentView, el
     }) {
         super({ parentView, el });
-        this.game = game;
         this.player = player;
-        this.playerBoardSide = playerBoardSide;
 
         this.render();
         this.mountPlayerHeroAvatar();
     }
 
     mountPlayerHeroAvatar() {
-        const avatarContainer = this.playerBoardSide.querySelector('[data-hero-avatar]');
-        const avatarURL = DotaAssetUrlManager.getHeroAvatarUrl(this.player.hero.id);
+        const avatarContainer = this.el;
         const avatarImage = avatarContainer.firstElementChild;
+        const avatarURL = DotaAssetUrlManager.getHeroAvatarUrl(this.player.hero.id);
+        const { isLeftAvatarDirection } = this.player.hero;
+        const { isRadiant } = this.player;
 
         avatarImage.src = avatarURL;
         avatarImage.classList = `${this.player.team}-avatar hero-game-page-avatar`;
-        avatarContainer.className = `data-hero-avatar-${this.player.team} hero-game-page-avatar-elem`;
-
-        const { isLeftAvatarDirection } = this.player.hero;
-        const { isRadiant } = this.player;
+        avatarContainer.classList = `data-hero-avatar-${this.player.team} hero-game-page-avatar-elem`;
 
         if (isLeftAvatarDirection && isRadiant) {
             avatarImage.style.transform = 'scale(-1, 1)';
