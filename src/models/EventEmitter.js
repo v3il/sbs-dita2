@@ -1,15 +1,28 @@
 export class EventEmitter {
-    /*
-        {
-            event1: [handler1, handler2, ...],
-            event2: [handler1, handler2, ...]
-        }
-     */
     #storage = {};
 
-    on(event, handler) {}
+    on(event, handler) {
+        const hasEvent = this.#storage[event] !== undefined;
+        if (hasEvent) {
+            this.#storage[event].push(handler);
+        } else {
+            this.#storage[event] = [handler];
+        }
+    }
 
-    off(event, handler) {}
+    off(event, handler) {
+        const hasEvent = this.#storage[event] !== undefined;
+        if (hasEvent) {
+            this.#storage = this.#storage[event].filter((func) => !(func === handler));
+        }
+    }
 
-    emit(event, data = {}) {}
+    emit(event, data = {}) {
+        const hasEvent = this.#storage[event] !== undefined;
+        if (hasEvent) {
+            this.#storage[event].forEach((handler) => {
+                handler.call(null, data);
+            });
+        }
+    }
 }

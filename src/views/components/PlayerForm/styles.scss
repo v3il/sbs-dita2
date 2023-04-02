@@ -1,3 +1,6 @@
+$button-shadow-hover: #00ffc84b;
+$button-shadow-focus: #00ffeab7;
+
 .player-form {
   padding: 24px;
   height: 100%;
@@ -8,7 +11,7 @@
 
 .player-form__title {
   font-size: 36px;
-  margin-bottom: 48px;
+  margin-bottom: 20px;
 }
 
 .player-form__title.red {
@@ -25,5 +28,92 @@
 
 .player-form__input {
   width: 100%;
-  margin-bottom: 24px;
+  margin-bottom: 10px;
 }
+
+.input:focus {
+  box-shadow: 0 0 5px $button-shadow-hover, 0 0 25px $button-shadow-hover,
+   0 0 50px $button-shadow-hover, 0 0 200px $button-shadow-hover;
+}
+
+.offset-bottom24:disabled { 
+  color: black;
+  background-color: aliceblue;
+  box-shadow: 0 0 5px $button-shadow-focus, 0 0 25px $button-shadow-focus,
+   0 0 50px $button-shadow-focus, 0 0 200px $button-shadow-focus;
+}
+
+.hero-selector {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 10px 10px;
+}
+
+.hero-avatar-button {
+  display: block;
+  border: none;
+  height:inherit;
+  cursor: pointer;
+  height: 15vh;
+}
+
+.hero-avatar-button-active {
+  border: none;
+  box-shadow: 0 0 5px $button-shadow-focus, 0 0 25px $button-shadow-focus,
+   0 0 50px $button-shadow-focus, 0 0 200px $button-shadow-focus;
+}
+
+.hero-avatar-button:hover {
+  box-shadow: 0 0 5px $button-shadow-hover, 0 0 25px $button-shadow-hover,
+   0 0 50px $button-shadow-hover, 0 0 200px $button-shadow-hover;
+}
+
+.hero-avatar-button:focus {
+  box-shadow: 0 0 5px $button-shadow-focus, 0 0 25px $button-shadow-focus,
+   0 0 50px $button-shadow-focus, 0 0 200px $button-shadow-focus;
+}
+
+.hero-avatar {
+  display: block;
+}
+
+.button--primary {
+  cursor: pointer;
+}
+
+.button--primary:disabled {
+  pointer-events: none;
+  opacity: 0.65;
+}
+
+.player-form_hero-stat{
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.hero-parameters {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  width: 100%;
+}
+
+.hero-name {
+  width: 200px;
+}
+
+.icon {
+  width: 25px;
+  margin-right: 5px;
+}
+
+.hero-stat {
+  display: flex;
+  align-items: center;
+}
+

@@ -25,7 +25,7 @@ export class Player {
 
     setHero(hero) {
         this.hero = hero;
-        this.events.emit('heroSelected');
+        this.hero.team = this.team;
     }
 
     async useSpell(spell, target) {

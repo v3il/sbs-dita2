@@ -2,6 +2,8 @@ import { ActiveSpell } from '../../../spells/ActiveSpell';
 
 export class NetherSwap extends ActiveSpell {
     damage = 75;
+    description = 'Deals 75 pure damage to enemy';
+    name = 'Nether Swap';
 
     constructor({ character }) {
         super({

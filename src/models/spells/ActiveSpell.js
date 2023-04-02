@@ -34,6 +34,8 @@ export class ActiveSpell extends BasicSpell {
     }
 
     decreaseCooldown() {
-        this.currentCooldown -= 1;
+        if (this.currentCooldown) {
+            this.currentCooldown -= 1;
+        }
     }
 }

@@ -29,23 +29,35 @@ export class BasicHero {
 
     #events;
 
-    // todo
-    // Потрібно засетити відповідні параметри в поля класу
-    // Наступні поля вираховуються по-особливому:
-    // - hitPoints, maxHitPoints = strength * 20 + BASE_HP
-    // - manaPoints, maxManaPoints = intelligence * 13 + BASE_MP
     constructor(attrs, events) {
-        console.log(attrs, events);
+        this.#events = events;
+        this.#id = attrs.id;
+        this.#name = attrs.name;
+        this.#avatarDirection = attrs.avatarDirection;
+        this.#strength = attrs.strength;
+        this.#agility = attrs.agility;
+        this.#intelligence = attrs.intelligence;
+        this.#minDamage = attrs.minDamage;
+        this.#maxDamage = attrs.maxDamage;
+        this.#armor = attrs.armor;
+        this.#hitPoints = attrs.strength * 20 + BASE_HIT_POINTS;
+        this.#maxHitPoints = attrs.strength * 20 + BASE_HIT_POINTS;
+        this.#manaPoints = attrs.intelligence * 13 + BASE_MANA_POINTS;
+        this.#maxManaPoints = attrs.intelligence * 13 + BASE_MANA_POINTS;
     }
 
     addEffect(effect) {
         this.#effects.push(effect);
         effect.applyEffect(this);
+
+        this.events.emit('effectAdded', ({ effect }));
     }
 
     removeEffect(effect) {
         this.#effects = this.#effects.filter((e) => e !== effect);
         effect.removeEffect(this);
+
+        this.events.emit('effectRemoved', ({ effect }));
     }
 
     addAttackModifier(modifier) {
@@ -56,85 +68,126 @@ export class BasicHero {
         this.#attackModifiers = this.#attackModifiers.filter((mod) => mod !== modifier);
     }
 
-    // todo
-    // Дозволяє "вдарити з руки" target
-    // Має шанс промаху, який залежить від параметру evasion у target'а: 0,01 evasion = 1% шансу промаху
-    // За основу береться базовий дамаг героя (getInitialDamage), потім пропускається через всі модифікатори атаки,
-    // (attackModifiers) щоб отримати фінальний дамаг
-    // Тип дамагу - фізичний
-    attack(target) {}
+    attack(target) {
+        if (Math.random() < target.#evasion) { return 0; }
+
+        const targetInitialHP = target.hitPoints;
+        let damage = this.getInitialDamage();
+
+        this.#attackModifiers.forEach((modifier) => {
+            damage = modifier.applyModifier(damage, target);
+        });
+
+        target.takePhysicalDamage(damage);
+        this.events.emit('baseAttack', { damage: targetInitialHP - target.hitPoints });
+
+        return damage;
+    }
 
     async useSpell(spell, target) {
+        const targetInitialHP = target.hitPoints;
+
         await spell.invoke(target);
+
+        this.events.emit('spell', { spell, damage: targetInitialHP - target.hitPoints });
     }
 
-    // todo
-    // Метод, який дозволяє оновити стан героя на початку його ходу
-    // - Потрібно оновити кулдаун активних спелів, які зараз на кд
-    // - Потрібно оновити тривалість активних ефектів і видалити ті, що закінчились
-    // Використовуй відповідні поля/методи класів ActiveSpell/Effect
-    updateState() {}
+    updateState() {
+        this.#spells.forEach((spell) => {
+            if (spell.isOnCooldown) {
+                spell.decreaseCooldown();
+            }
+        });
 
-    // todo
-    // Метод, який дозволяє обрахувати і нанести фіз. дамаг цьому герою
-    // Фізичний дамаг, ріжеться параметром armor
-    // 1 armor === -5% дамага
-    takePhysicalDamage(damage) {}
-
-    // todo
-    // Метод, який дозволяє обрахувати і нанести маг. дамаг цьому герою
-    // Магічний дамаг, ріжеться параметром magicResistance
-    // 0,01MR === -1% дамага
-    takeMagicalDamage(damage) {}
-
-    // todo
-    // Метод, який дозволяє обрахувати і нанести чистий дамаг цьому герою
-    // Чистий дамаг, не ріжеться нічим
-    takePureDamage(damage) {}
-
-    get isLeftAvatarDirection() {
-        return this.#avatarDirection === 'left';
+        this.#effects.forEach((effect) => {
+            effect.decreaseDuration();
+            if (effect.isEnded) {
+                this.removeEffect(effect);
+            }
+        });
     }
 
-    // todo
-    // Потрібно зробити перевірку, чи живий герой чи ні
-    get isDead() {
-        return false;
+    takePhysicalDamage(damage) {
+        this.decreaseHitPoints(damage * (1 - this.#armor * 0.05));
     }
 
-    // todo
-    // Треба зробити обрахунок базового дамагу з руки (число в діапазоні [minDamage, maxDamage])
+    takeMagicalDamage(damage) {
+        this.decreaseHitPoints(damage * (1 - this.#magicResistance));
+    }
+
+    takePureDamage(damage) {
+        this.decreaseHitPoints(damage);
+    }
+
     getInitialDamage() {
-        return 0;
+        return Math.random() * (this.#maxDamage - this.#minDamage) + this.#minDamage;
     }
 
     setSpells(spells) {
         this.#spells = spells;
     }
 
-    // todo
-    increaseHitPoints(delta) {}
+    increaseHitPoints(delta) {
+        const hitPoints = Math.round(this.#hitPoints + delta);
+        if (hitPoints > this.#maxHitPoints) {
+            this.#hitPoints = this.#maxHitPoints;
+        } else {
+            this.#hitPoints = hitPoints;
+        }
 
-    // todo
-    decreaseHitPoints(delta) {}
+        this.events.emit('updateHPBar', { currentHP: this.#hitPoints });
+    }
 
-    // todo
-    increaseEvasion(delta) {}
+    decreaseHitPoints(delta) {
+        const hitPoints = Math.round(this.#hitPoints - delta);
+        if (hitPoints > 0) {
+            this.#hitPoints = hitPoints;
+        } else {
+            this.#hitPoints = 0;
+        }
 
-    // todo
-    decreaseEvasion(delta) {}
+        this.events.emit('updateHPBar', { currentHP: this.#hitPoints });
+    }
 
-    // todo
-    increaseArmor(delta) {}
+    increaseEvasion(delta) {
+        this.#evasion = +(this.#evasion + delta).toFixed(1);
+    }
 
-    // todo
-    decreaseArmor(delta) {}
+    decreaseEvasion(delta) {
+        this.#evasion = +(this.#evasion - delta).toFixed(1);
+    }
+    increaseArmor(delta) {
+        this.#armor = +(this.#armor + delta).toFixed(1);
+        this.events.emit('updateStats');
+    }
 
-    // todo
-    decreaseMana(delta) {}
+    decreaseArmor(delta) {
+        this.#armor = +(this.#armor - delta).toFixed(1);
+        this.events.emit('updateStats');
+    }
 
-    // todo
-    setSilenced(value) {}
+    decreaseMana(delta) {
+        const manaPoints = Math.round((this.#manaPoints - delta) * 10) / 10;
+        if (manaPoints > 0) {
+            this.#manaPoints = manaPoints;
+        } else {
+            this.#manaPoints = 0;
+        }
+
+        this.events.emit('updateManaBar', { currentMana: this.#manaPoints });
+    }
+
+    increaseMagicResist(delta) {
+        this.#magicResistance += delta;
+    }
+
+    decraseMagicResist(delta) {
+        this.#magicResistance -= delta;
+    }
+
+    setSilenced(value) {
+        this.#isSilenced = value;
+    }
 
     get events() {
         return this.#events;
@@ -164,12 +217,20 @@ export class BasicHero {
         return this.#intelligence;
     }
 
+    get isLeftAvatarDirection() {
+        return this.#avatarDirection === 'left';
+    }
+
+    get isDead() {
+        return this.#hitPoints <= 0;
+    }
+
     get armor() {
         return this.#armor;
     }
 
     get hitPoints() {
-        return this.#hitPoints;
+        return Math.round(this.#hitPoints);
     }
 
     get minDamage() {
@@ -185,7 +246,7 @@ export class BasicHero {
     }
 
     get manaPoints() {
-        return this.#manaPoints;
+        return Math.round(this.#manaPoints);
     }
 
     get maxManaPoints() {

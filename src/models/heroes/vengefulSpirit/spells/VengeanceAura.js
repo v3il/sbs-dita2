@@ -3,6 +3,9 @@ import { VengeanceAuraModifier } from '../../../modifiers';
 import { Effect } from '../../../effects';
 
 export class VengeanceAura extends PassiveSpell {
+    description = 'Your base damage increased by 33%';
+    name = 'Vengeance Aura';
+
     constructor({ character }) {
         super({ character, id: 'vengefulspirit_command_aura' });
     }
@@ -14,7 +17,7 @@ export class VengeanceAura extends PassiveSpell {
             apply: (target) => target.addAttackModifier(modifier),
             remove: (target) => target.removeAttackModifier(modifier),
             spellId: this.id,
-            description: 'Base damage increased by 33%'
+            description: 'base damage increased by 33%'
         }));
     }
 }

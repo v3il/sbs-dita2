@@ -10,4 +10,8 @@ export class DotaAssetUrlManager {
     static getSpellUrl(spellId) {
         return `https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react/abilities/${spellId}.png`;
     }
+
+    static getAttackIconUrl() {
+        return 'https://cdn.cloudflare.steamstatic.com/apps/dota2/images/dota_react//heroes/stats/icon_damage.png';
+    }
 }
