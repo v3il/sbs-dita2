@@ -11,6 +11,7 @@ export class Logger extends ComponentView {
         el
     }) {
         super({ parentView, el });
+
         this.radiantPlayer = radiantPlayer;
         this.direPlayer = direPlayer;
 
@@ -112,6 +113,7 @@ export class Logger extends ComponentView {
 
     createMessage(text, type = null) {
         const message = document.createElement('p');
+
         message.textContent = text;
         switch (type) {
         case 'caption': message.className = 'logger-message-caption';
@@ -127,6 +129,6 @@ export class Logger extends ComponentView {
     }
 
     render() {
-        super.render(loggerTemplate); //    test
+        super.render(loggerTemplate);
     }
 }

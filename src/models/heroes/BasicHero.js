@@ -129,6 +129,7 @@ export class BasicHero {
 
     increaseHitPoints(delta) {
         const hitPoints = Math.round(this.#hitPoints + delta);
+
         if (hitPoints > this.#maxHitPoints) {
             this.#hitPoints = this.#maxHitPoints;
         } else {
@@ -140,6 +141,7 @@ export class BasicHero {
 
     decreaseHitPoints(delta) {
         const hitPoints = Math.round(this.#hitPoints - delta);
+
         if (hitPoints > 0) {
             this.#hitPoints = hitPoints;
         } else {

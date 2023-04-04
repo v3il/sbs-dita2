@@ -2,7 +2,6 @@ import { HeroAction } from '../HeroAction/HeroAction';
 import { HeroStats } from '../HeroStat/HeroStat';
 import { PlayerStatusBar } from '../PlayerStatusBar/PlayerStatusBar';
 import { ProgressBar } from '../ProgressBar/ProgressBar';
-import { game } from '../../../models';
 import { HeroGameboardAvatar } from '../HeroGameboardAvatar/HeroGameboardAvatar';
 import { HeroModifier } from '../HeroModifier/HeroModifier';
 
@@ -11,9 +10,9 @@ export class PlayerGameboardSide {
         this.player = player;
         this.parentView = parentView;
 
+        this.hero = this.player.hero;
         this.teamName = this.player.team;
         this.playerGameboardView = document.querySelector(`[data-${this.teamName}-player-view]`);
-        this.hero = this.player.hero;
 
         this.initTeam();
         this.heroStats.showStats(this.hero);

@@ -1,5 +1,6 @@
-$button-shadow-hover: #00ffc84b;
-$button-shadow-focus: #00ffeab7;
+$shadow-hover: 0 0 5px #00ffc84b, 0 0 25px #00ffc84b, 0 0 50px #00ffc84b, 0 0 200px #00ffc84b;
+
+$shadow-focus: 0 0 5px #00ffeab7, 0 0 25px #00ffeab7, 0 0 50px #00ffeab7, 0 0 200px #00ffeab7;
 
 .player-form {
   padding: 24px;
@@ -32,15 +33,15 @@ $button-shadow-focus: #00ffeab7;
 }
 
 .input:focus {
-  box-shadow: 0 0 5px $button-shadow-hover, 0 0 25px $button-shadow-hover,
-   0 0 50px $button-shadow-hover, 0 0 200px $button-shadow-hover;
+  box-shadow: $shadow-focus;
 }
 
-.offset-bottom24:disabled { 
-  color: black;
-  background-color: aliceblue;
-  box-shadow: 0 0 5px $button-shadow-focus, 0 0 25px $button-shadow-focus,
-   0 0 50px $button-shadow-focus, 0 0 200px $button-shadow-focus;
+.input-field-active {
+  box-shadow: $shadow-focus;
+}
+
+.input:disabled {
+  background-color: rgba(240, 248, 255, 0.726);
 }
 
 .hero-selector {
@@ -61,18 +62,15 @@ $button-shadow-focus: #00ffeab7;
 
 .hero-avatar-button-active {
   border: none;
-  box-shadow: 0 0 5px $button-shadow-focus, 0 0 25px $button-shadow-focus,
-   0 0 50px $button-shadow-focus, 0 0 200px $button-shadow-focus;
+  box-shadow: $shadow-focus;
 }
 
 .hero-avatar-button:hover {
-  box-shadow: 0 0 5px $button-shadow-hover, 0 0 25px $button-shadow-hover,
-   0 0 50px $button-shadow-hover, 0 0 200px $button-shadow-hover;
+  box-shadow: $shadow-hover;
 }
 
 .hero-avatar-button:focus {
-  box-shadow: 0 0 5px $button-shadow-focus, 0 0 25px $button-shadow-focus,
-   0 0 50px $button-shadow-focus, 0 0 200px $button-shadow-focus;
+  box-shadow: $shadow-focus;
 }
 
 .hero-avatar {

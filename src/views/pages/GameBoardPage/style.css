@@ -80,7 +80,6 @@ flex-basis: 100px;
 
 .hero-game-page-avatar {
     height: 50vh;
-
 }
 
 .data-hero-progress-bar-block {
@@ -250,6 +249,7 @@ flex-basis: 100px;
     bottom: 0px;
     display: flex;
     gap: 10px;
+    padding-bottom: 10px;
 }
 
 .modifier-icon {
