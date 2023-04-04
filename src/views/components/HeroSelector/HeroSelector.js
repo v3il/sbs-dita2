@@ -5,20 +5,13 @@ import heroAvatarButtonTemplate from './heroAvatarButtonTemplate.html?raw';
 import heroSelectorContainerTemplate from './heroSelectorContainerTemplate.html?raw';
 
 export class HeroSelector extends ComponentView {
-    constructor({ playerFormContainer, parentView, el }) {
+    constructor({ parentView, el }) {
         super({ parentView, el });
 
         this.playerForm = parentView;
-        this.playerFormContainer = playerFormContainer;
-        this.avatarButtonsContainer = null;
 
         this.render();
-        this.init();
         this.renderHeroIcons();
-    }
-
-    init() {
-        this.avatarButtonsContainer = this.playerFormContainer.querySelector('[data-hero-selector]');
     }
 
     renderHeroIcons() {
@@ -43,20 +36,20 @@ export class HeroSelector extends ComponentView {
             this.playerForm.on('setAvatarButtonState-Passive', () => this.setButtonPassive(heroAvatarButton));
             this.playerForm.on(`setAvatarButtonState-Active-${hero.id}`, () => this.setButtonActive(heroAvatarButton));
 
-            this.avatarButtonsContainer.appendChild(heroAvatarButton);
+            this.el.appendChild(heroAvatarButton);
         });
     }
 
     setButtonPassive(button) {
         const buttonElem = button;
 
-        buttonElem.className = 'hero-avatar-button';
+        buttonElem.classList = 'hero-avatar-button';
     }
 
     setButtonActive(button) {
         const buttonElem = button;
 
-        buttonElem.className = 'hero-avatar-button-active';
+        buttonElem.classList = 'hero-avatar-button-active';
     }
 
     disableButton(button) {
