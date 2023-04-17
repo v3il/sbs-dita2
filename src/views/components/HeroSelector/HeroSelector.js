@@ -12,53 +12,73 @@ export class HeroSelector extends ComponentView {
 
         this.render();
         this.renderHeroIcons();
+        this.handleHeroChoose();
+        this.handleButtonsState();
+    }
+
+    render() {
+        super.render(heroSelectorContainerTemplate);
     }
 
     renderHeroIcons() {
         const heroes = heroFactory.availableHeroes;
 
         heroes.forEach((hero) => {
-            const currentHeroAvatarURL = DotaAssetUrlManager.getHeroImageUrl(hero.id);
-            const heroAvatarButton = document.createElement('button');
+            const avatarElement = this.createAvatar(hero);
 
-            heroAvatarButton.innerHTML = heroAvatarButtonTemplate;
-            this.setButtonPassive(heroAvatarButton);
-
-            const avatarImage = heroAvatarButton.querySelector('[data-hero-avatar]');
-
-            avatarImage.src = currentHeroAvatarURL;
-
-            heroAvatarButton.addEventListener('click', () => {
-                this.playerForm.emit('chooseHero', { hero });
-            });
-
-            this.playerForm.on('disableAllAvatarButtons', () => this.disableButton(heroAvatarButton));
-            this.playerForm.on('setAvatarButtonState-Passive', () => this.setButtonPassive(heroAvatarButton));
-            this.playerForm.on(`setAvatarButtonState-Active-${hero.id}`, () => this.setButtonActive(heroAvatarButton));
-
-            this.el.appendChild(heroAvatarButton);
+            this.el.appendChild(avatarElement);
         });
     }
 
-    setButtonPassive(button) {
-        const buttonElem = button;
+    createAvatar(hero) {
+        const currentHeroAvatarURL = DotaAssetUrlManager.getHeroImageUrl(hero.id);
+        const heroAvatarButton = document.createElement('button');
 
-        buttonElem.classList = 'hero-avatar-button';
+        heroAvatarButton.innerHTML = heroAvatarButtonTemplate;
+
+        const avatarImage = heroAvatarButton.firstElementChild;
+
+        avatarImage.dataset.heroId = hero.id;
+        avatarImage.src = currentHeroAvatarURL;
+
+        return heroAvatarButton;
     }
 
-    setButtonActive(button) {
-        const buttonElem = button;
+    handleHeroChoose() {
+        this.el.addEventListener('click', (event) => {
+            if (event.target.nodeName !== 'IMG') return;
 
-        buttonElem.classList = 'hero-avatar-button-active';
+            this.playerForm.emit('chooseHero', { heroId: event.target.dataset.heroId });
+        });
     }
 
-    disableButton(button) {
+    handleButtonsState() {
+        this.playerForm.on('handleButtonsState', ({ state, heroId = null }) => {
+            if (state === 'active') {
+                const avatarToSelect = this.el.querySelector(`[data-hero-id=${heroId}]`);
+                const selectedAvatar = this.el.querySelector('.hero-avatar-button-active');
+
+                if (selectedAvatar) this.setPassive(selectedAvatar);
+                this.setActive(avatarToSelect);
+            }
+
+            if (state === 'disable') {
+                this.el.querySelectorAll('button').forEach((button) => this.disable(button));
+            }
+        });
+    }
+
+    setPassive(button) {
+        button.classList.remove('hero-avatar-button-active');
+    }
+
+    setActive(button) {
+        button.classList.add('hero-avatar-button-active');
+    }
+
+    disable(button) {
         const buttonElem = button;
 
         buttonElem.disabled = true;
-    }
-
-    render() {
-        super.render(heroSelectorContainerTemplate);
     }
 }
